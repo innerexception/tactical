@@ -1,0 +1,56 @@
+tactical
+
+scrolling symmetrical grid
+tile size can be adjusted to simulate zooming
+
+initial tile types
+
+    -grass
+    -forest -1 move +1 cover
+    -hill -1 move +1 ranged
+    -river  impassible by the living
+
+units
+    the living
+        regular
+            2 move
+            5 hp
+            1 atk
+            special: 20% block chance
+        immortal
+            2 move
+            4 hp
+            3 atk
+            special: Charge forward 3 (recharge 2)
+        marksman
+            1 move
+            2 hp
+            1 atk, range 5
+        alchemist
+            1 move
+            2 hp
+            0 atk
+            special: alchemist fire (ranged 4, atk 2, area 2, recharge 2)
+    the dead
+        risen
+            1 move
+            2 hp
+            1 atk
+            special: underwater breathing
+        wisp
+            1 move
+            2 hp
+            1 atk, ranged 5
+            special: float (ignore terrain)
+        goul
+            3 move
+            1 atk
+            2 hp
+            special: underwater breathing
+        gargantuan
+            2 move
+            4 atk
+            10 hp
+            special: immobilized at less than 2 hp
+        
+    
