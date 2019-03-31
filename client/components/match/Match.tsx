@@ -1,9 +1,10 @@
 import * as React from 'react'
 import { onMatchTick, onPlayerReady } from '../uiManager/Thunks'
-import { Button, Card, Dialog, Tooltip, Position, Icon, Drawer, RadioGroup, Popover } from '@blueprintjs/core'
+import { Button, Card, Dialog, Tooltip, NumericInput, Icon, Drawer, Radio, RadioGroup, Popover } from '@blueprintjs/core'
 import AppStyles from '../../AppStyles';
 import Map from './Map'
-import { MatchStatus } from '../../../enum';
+import { MatchStatus, UnitType, Army, Units } from '../../../enum';
+import { arrayLengthCompare } from '@blueprintjs/core/lib/esm/common/utils';
 
 interface Props {
     currentUser: LocalUser
@@ -15,6 +16,8 @@ interface State {
     interval: NodeJS.Timeout | number
     showMatchOptions: boolean
     army: Array<Unit>
+    armyType: Army
+    points: number
 }
 
 export default class Match extends React.Component<Props, State> {
@@ -23,7 +26,9 @@ export default class Match extends React.Component<Props, State> {
         interval: 0,
         isActive: false,
         showMatchOptions: false,
-        army: Array<Unit>()
+        army: Array<Unit>(),
+        armyType: Army.LIVING,
+        points: 30
     }
 
     componentDidMount = () => {
@@ -35,7 +40,24 @@ export default class Match extends React.Component<Props, State> {
         // onEndTurn(this.props.currentUser, this.props.activeSession)
     }
 
+    setUnitTypeCount = (count:number, type:UnitType) => {
+        let army = this.state.army.filter((unit) => unit.type !== type)
+        army = army.concat(new Array(count).fill(Units[this.state.armyType].find((unit) => unit.type === type)))
+        this.setState({army, points: 30 - this.getArmyValue()})
+    }
+
+    getArmyValue = () => {
+        let cost = 0
+        this.state.army.forEach((unit) => cost+=unit.cost)
+        return cost
+    }
+
     setPlayerReady = () => {
+        this.state.army.forEach((unit, i) => {
+            unit.x = i,
+            unit.y = 0,
+            unit.id = Date.now()+''+Math.random()
+        })
         onPlayerReady(this.props.currentUser, this.state.army, this.props.activeSession)
     }
 
@@ -58,7 +80,7 @@ export default class Match extends React.Component<Props, State> {
                      players={this.props.activeSession.players}/>
                 <Drawer
                     isOpen={this.state.showMatchOptions}
-                    style={AppStyles.modal}
+                    style={styles.drawer}
                     onClose={() => this.setState({ showMatchOptions: false })}
                 >
                     <div style={{display:'flex'}}>
@@ -67,10 +89,30 @@ export default class Match extends React.Component<Props, State> {
                 </Drawer>
                 <Drawer
                     isOpen={this.props.activeSession.status === MatchStatus.SETUP}
-                    style={AppStyles.modal}
+                    style={styles.drawer}
                 >
-                    <div style={{display:'flex'}}>
-                        army builder
+                    <div>
+                        <RadioGroup
+                            inline
+                            label="Army"
+                            onChange={(e)=>this.setState({armyType: e.currentTarget.value as Army, points: 30, army: []})}
+                            selectedValue={this.state.armyType}
+                        >
+                            <Radio label="Living" value={Army.LIVING} />
+                            <Radio label="Dead" value={Army.DEAD} />
+                        </RadioGroup>
+                        <h4>Available: {this.state.points}</h4>
+                        {Units[this.state.armyType].map((unit) => 
+                            <div style={{display:'flex'}}>
+                                <div>
+                                    <div>{getUnitCount(this.state.army, unit.type)}</div>
+                                    <div>{unit.name}</div>
+                                    <div style={{fontFamily:'Rune', fontSize:'1em'}}>{unit.rune}</div>
+                                </div>
+                                <div style={styles.circleButton} onClick={()=>this.setUnitTypeCount(getUnitCount(this.state.army, unit.type)+1, unit.type)}>+</div>
+                                <div style={styles.circleButton} onClick={()=>this.setUnitTypeCount(getUnitCount(this.state.army, unit.type)-1, unit.type)}>-</div>
+                            </div>
+                        )}
                         <button onClick={()=>this.setPlayerReady()}>Done</button>
                     </div>
                 </Drawer>
@@ -79,10 +121,27 @@ export default class Match extends React.Component<Props, State> {
     }
 }
 
+const getUnitCount = (army:Array<Unit>, unitType:UnitType) => army.filter((aunit)=>aunit.type === unitType).length
+
 const styles = {
     frame: {
         padding:'1em',
         position:'relative' as 'relative'
+    },
+    drawer: {
+        height:'100%',
+        padding:'1em',
+        backgroundImage: 'url(./build'+require('../../assets/basemap.jpg')+')',
+        backgroundPosition:'center',
+        backgroundRepeat: 'no-repeat'
+    },
+    circleButton: {
+        cursor:'pointer',
+        height:'2em',
+        width:'2em',
+        display:'flex',
+        alignItems:'center',
+        justifyContent: 'center'
     },
     choiceBtn: {
         margin: 0,

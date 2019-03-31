@@ -41,28 +41,30 @@ export default class Map extends React.Component<Props, State> {
                 </div>
                 <div>
                     {getUnitInfoOfTile(this.state.selectedTile, this.props.players, this.props.activePlayer)}
-                    {getUnitActionButtons(getUnitOfTile(this.state.selectedTile, this.props.players), this.props.activePlayer)}
+                    {getUnitActionButtons(this.props.activePlayer, getUnitOfTile(this.state.selectedTile, this.props.players))}
                 </div>
             </div>
         )
     }
 }
 
-const getUnitActionButtons = (unit:Unit, activePlayer:Player) => {
-    let isOwner = activePlayer.units.find((punit)=>unit.id === punit.id)
-    if(unit && isOwner){
-        return <div>
-                    {unit.move<unit.maxMove && <button onClick={()=>this.cancelMove(unit)}>Cancel</button>}
-                    {unit.move===unit.maxMove && <button onClick={()=>this.setState({movingUnit: unit})}>Move</button>}
-                    {unit.ability && <button onClick={()=>this.performSpecial(unit)}>{unit.ability}</button>}
-                </div>
+const getUnitActionButtons = (activePlayer:Player, unit?:Unit) => {
+    if(unit){
+        let isOwner = activePlayer.units.find((punit)=>unit.id === punit.id)
+        if(isOwner){
+            return <div>
+                        {unit.move<unit.maxMove && <button onClick={()=>this.cancelMove(unit)}>Cancel</button>}
+                        {unit.move===unit.maxMove && <button onClick={()=>this.setState({movingUnit: unit})}>Move</button>}
+                        {unit.ability && <button onClick={()=>this.performSpecial(unit)}>{unit.ability}</button>}
+                    </div>
+        }
     }
     return <span/>
 }
 
-const getMoveArrowsOfTile = (tile:Tile, players:Array<Player>, movingUnit:Unit) => {
+const getMoveArrowsOfTile = (tile:Tile, players:Array<Player>, movingUnit?:Unit) => {
     let tileUnit = getUnitOfTile(tile, players) as Unit
-    if(tileUnit && tileUnit.id === movingUnit.id)
+    if(tileUnit && movingUnit && tileUnit.id === movingUnit.id)
         return [
                     <div style={styles.leftArrow} onClick={()=>this.moveUnit(tileUnit, Directions.LEFT)}>{'<'}</div>,
                     <div style={styles.rightArrow} onClick={()=>this.moveUnit(tileUnit, Directions.RIGHT)}>></div>,
@@ -86,13 +88,14 @@ const getUnitPortraitOfTile = (tile:Tile, players:Array<Player>, activePlayer:Pl
 
 const getUnitInfoOfTile = (tile:Tile, players:Array<Player>, activePlayer:Player) => {
     let unit = getUnitOfTile(tile, players) as Unit
-    let isOwner = activePlayer.units.find((punit)=>unit.id === punit.id)
-    if(unit)
+    if(unit){
+        let isOwner = activePlayer.units.find((punit)=>unit.id === punit.id)
         return <div>
                     <h4>{tile.type}</h4>
                     <h4>{unit.descriptions[Math.floor(Math.random() * Math.floor(unit.descriptions.length))]}</h4>
                     {isOwner && <h4>M: {unit.move} / {unit.maxMove}</h4>}
                </div>
+    }
     else 
         return <div>
                     <h4>{tile.type}</h4>
