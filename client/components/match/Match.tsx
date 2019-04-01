@@ -42,7 +42,10 @@ export default class Match extends React.Component<Props, State> {
 
     setUnitTypeCount = (count:number, type:UnitType) => {
         let army = this.state.army.filter((unit) => unit.type !== type)
-        army = army.concat(new Array(count).fill(Units[this.state.armyType].find((unit) => unit.type === type)))
+        army = army.concat(new Array(count).fill(
+            {...Units[this.state.armyType].find((unit) => unit.type === type)}
+        ))
+        console.log('what')
         this.setState({army, points: 30 - this.getArmyValue()})
     }
 
@@ -53,10 +56,13 @@ export default class Match extends React.Component<Props, State> {
     }
 
     setPlayerReady = () => {
-        this.state.army.forEach((unit, i) => {
-            unit.x = i,
-            unit.y = 0,
-            unit.id = Date.now()+''+Math.random()
+        this.state.army = this.state.army.map((unit, i) => {
+            return {
+                ...unit,
+                x:i,
+                y:0,
+                id: Date.now()+''+Math.random()
+            }
         })
         onPlayerReady(this.props.currentUser, this.state.army, this.props.activeSession)
     }
@@ -76,7 +82,8 @@ export default class Match extends React.Component<Props, State> {
         return (
             <div style={styles.frame}>
                 <Map map={this.props.activeSession.map} 
-                     activePlayer={activePlayer}
+                     activePlayer={me}
+                     activeSession={this.props.activeSession}
                      players={this.props.activeSession.players}/>
                 <Drawer
                     isOpen={this.state.showMatchOptions}

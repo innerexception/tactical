@@ -52,10 +52,25 @@ export const onMatchStart = (currentUser:LocalUser, session:Session) => {
     toast.show({message: 'Match was begun.'})
 }
 
+export const onMoveUnit = (unit:Unit, session:Session) => {
+    session.players.forEach((player) => player.units.forEach((punit) => {
+        if(punit.id === unit.id) punit = {...unit}
+    }))
+    server.publishMessage({
+        type:   Constants.ReducerActions.MATCH_UPDATE,
+        sessionId: session.sessionId,
+        session
+    })
+}
+
 export const onMatchTick = (session:Session) => {
     server.publishMessage({
         type:   Constants.ReducerActions.MATCH_UPDATE,
-        sessionId: session.sessionId
+        sessionId: session.sessionId,
+        session: {
+            ...session,
+            ticks: session.ticks++
+        }
     })
 }
 

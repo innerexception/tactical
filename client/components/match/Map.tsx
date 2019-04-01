@@ -1,11 +1,12 @@
 import * as React from 'react'
-import {  } from '../uiManager/Thunks'
+import { onMoveUnit } from '../uiManager/Thunks'
 import { Button, Card, Dialog, Tooltip, Position, Icon, Drawer, RadioGroup, Popover } from '@blueprintjs/core'
 import AppStyles from '../../AppStyles';
 import { Directions, TileType } from '../../../enum'
 import * as background from '../../assets/basemap.jpg'
 
 interface Props {
+    activeSession: Session
     activePlayer: Player
     players: Array<Player>
     map: Array<Array<Tile>>
@@ -13,13 +14,72 @@ interface Props {
 
 interface State {
     selectedTile: Tile
+    movingUnit: Unit | null
+    startX: number
+    startY: number
 }
 
 export default class Map extends React.Component<Props, State> {
 
     state = {
         selectedTile: { x:-1, y:-1, type: TileType.GRASS, subType: '' },
-        movingUnit: null as null
+        movingUnit: null as null,
+        startX: -1,
+        startY: -1
+    }
+
+    moveUnit = (unit:Unit, direction:Directions) => {
+        if(unit.move > 0){
+            switch(direction){
+                case Directions.DOWN: unit.y++
+                     break
+                case Directions.UP: unit.y--
+                     break
+                case Directions.LEFT: unit.x--
+                     break
+                case Directions.RIGHT: unit.x++
+                     break
+            }
+            unit.move--
+        }
+        onMoveUnit(unit, this.props.activeSession)
+    }
+
+    cancelMove = (unit:Unit) => {
+        unit.move = unit.maxMove
+        unit.x = this.state.startX
+        unit.y = this.state.startY
+        this.setState({movingUnit: null})
+    }
+
+    performSpecial = (unit:Unit) => {
+
+    }
+
+    getUnitActionButtons = (activePlayer:Player, unit?:Unit) => {
+        if(unit){
+            let isOwner = activePlayer.units.find((punit)=>unit.id === punit.id)
+            if(isOwner){
+                return <div>
+                            {unit.move<unit.maxMove && <button onClick={()=>this.cancelMove(unit)}>Cancel</button>}
+                            {unit.move===unit.maxMove && <button onClick={()=>this.setState({movingUnit: unit, startX: unit.x, startY: unit.y})}>Move</button>}
+                            {unit.ability && <button onClick={()=>this.performSpecial(unit)}>{unit.ability}</button>}
+                        </div>
+            }
+        }
+        return <span/>
+    }
+
+    getMoveArrowsOfTile = (tile:Tile, players:Array<Player>, movingUnit?:Unit) => {
+        let tileUnit = getUnitOfTile(tile, players) as Unit
+        if(tileUnit && movingUnit && tileUnit.id === movingUnit.id)
+            return [
+                    <div style={styles.leftArrow} onClick={()=>this.moveUnit(tileUnit, Directions.LEFT)}>{'<'}</div>,
+                    <div style={styles.rightArrow} onClick={()=>this.moveUnit(tileUnit, Directions.RIGHT)}>></div>,
+                    <div style={styles.upArrow} onClick={()=>this.moveUnit(tileUnit, Directions.UP)}>^</div>,
+                    <div style={styles.downArrow} onClick={()=>this.moveUnit(tileUnit, Directions.DOWN)}>v</div>
+                ]
+        return <span/>
     }
 
     render(){
@@ -32,7 +92,7 @@ export default class Map extends React.Component<Props, State> {
                                 <div style={{...styles.tile, background: 'transparent'}} 
                                     onClick={()=>this.setState({selectedTile: tile})}>
                                     <div style={{fontFamily:'Terrain', color: AppStyles.colors.white}}>{tile.subType}</div>
-                                    {getMoveArrowsOfTile(tile, this.props.players, this.state.movingUnit)}
+                                    {this.getMoveArrowsOfTile(tile, this.props.players, this.state.movingUnit)}
                                     {getUnitPortraitOfTile(tile, this.props.players, this.props.activePlayer)}
                                 </div>
                             )}
@@ -41,37 +101,11 @@ export default class Map extends React.Component<Props, State> {
                 </div>
                 <div>
                     {getUnitInfoOfTile(this.state.selectedTile, this.props.players, this.props.activePlayer)}
-                    {getUnitActionButtons(this.props.activePlayer, getUnitOfTile(this.state.selectedTile, this.props.players))}
+                    {this.getUnitActionButtons(this.props.activePlayer, getUnitOfTile(this.state.selectedTile, this.props.players))}
                 </div>
             </div>
         )
     }
-}
-
-const getUnitActionButtons = (activePlayer:Player, unit?:Unit) => {
-    if(unit){
-        let isOwner = activePlayer.units.find((punit)=>unit.id === punit.id)
-        if(isOwner){
-            return <div>
-                        {unit.move<unit.maxMove && <button onClick={()=>this.cancelMove(unit)}>Cancel</button>}
-                        {unit.move===unit.maxMove && <button onClick={()=>this.setState({movingUnit: unit})}>Move</button>}
-                        {unit.ability && <button onClick={()=>this.performSpecial(unit)}>{unit.ability}</button>}
-                    </div>
-        }
-    }
-    return <span/>
-}
-
-const getMoveArrowsOfTile = (tile:Tile, players:Array<Player>, movingUnit?:Unit) => {
-    let tileUnit = getUnitOfTile(tile, players) as Unit
-    if(tileUnit && movingUnit && tileUnit.id === movingUnit.id)
-        return [
-                    <div style={styles.leftArrow} onClick={()=>this.moveUnit(tileUnit, Directions.LEFT)}>{'<'}</div>,
-                    <div style={styles.rightArrow} onClick={()=>this.moveUnit(tileUnit, Directions.RIGHT)}>></div>,
-                    <div style={styles.upArrow} onClick={()=>this.moveUnit(tileUnit, Directions.UP)}>^</div>,
-                    <div style={styles.downArrow} onClick={()=>this.moveUnit(tileUnit, Directions.DOWN)}>v</div>
-            ]
-    return <span/>
 }
 
 const getUnitPortraitOfTile = (tile:Tile, players:Array<Player>, activePlayer:Player) => {
@@ -140,38 +174,42 @@ const styles = {
     },
     leftArrow: {
         position:'absolute' as 'absolute',
-        left:0,
+        left:'-1em',
         top:0,
         bottom:0,
         width:'1em',
         height:'1em',
-        cursor:'pointer'
+        cursor:'pointer',
+        zIndex:2
     },
     rightArrow: {
         position:'absolute' as 'absolute',
-        right:0,
+        right:'-2em',
         top:0,
         bottom:0,
         width:'1em',
         height:'1em',
-        cursor:'pointer'
+        cursor:'pointer',
+        zIndex:2
     },
     upArrow: {
         position:'absolute' as 'absolute',
         right:0,
-        top:0,
-        left:0,
+        top:'-1em',
+        left:'1em',
         width:'1em',
         height:'1em',
-        cursor:'pointer'
+        cursor:'pointer',
+        zIndex:2
     },
     downArrow: {
         position:'absolute' as 'absolute',
         right:0,
-        bottom:0,
-        left:0,
+        bottom:'-1em',
+        left:'1em',
         width:'1em',
         height:'1em',
-        cursor:'pointer'
+        cursor:'pointer',
+        zIndex:2
     }
 }
