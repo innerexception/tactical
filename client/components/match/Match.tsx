@@ -45,13 +45,12 @@ export default class Match extends React.Component<Props, State> {
         army = army.concat(new Array(count).fill(
             {...Units[this.state.armyType].find((unit) => unit.type === type)}
         ))
-        console.log('what')
-        this.setState({army, points: 30 - this.getArmyValue()})
+        this.setState({army, points: 30 - this.getArmyValue(army)})
     }
 
-    getArmyValue = () => {
+    getArmyValue = (army:Array<Unit>) => {
         let cost = 0
-        this.state.army.forEach((unit) => cost+=unit.cost)
+        army.forEach((unit) => cost+=unit.cost)
         return cost
     }
 
