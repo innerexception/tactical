@@ -60,7 +60,8 @@ export default class Match extends React.Component<Props, State> {
                 ...unit,
                 x:i,
                 y:0,
-                id: Date.now()+''+Math.random()
+                id: Date.now()+''+Math.random(),
+                ownerId: this.props.currentUser.id
             }
         })
         onPlayerReady(this.props.currentUser, this.state.army, this.props.activeSession)

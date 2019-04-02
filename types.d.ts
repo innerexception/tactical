@@ -32,6 +32,7 @@ interface LocalUser {
 
 interface Unit {
     id:string
+    ownerId: string
     x:number
     y:number
     atk: number
@@ -51,7 +52,6 @@ interface Unit {
 interface Player {
     name: string
     id: string
-    units: Array<Unit>
     isReady: boolean
 }
 
@@ -60,6 +60,7 @@ interface Tile {
     y: number
     type: TileType
     subType: string
+    unit: Unit
 }
 
 interface Session {

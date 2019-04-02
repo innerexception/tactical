@@ -14,9 +14,11 @@ export const onLogin = (currentUser:LocalUser, sessionId:string) => {
 export const onPlayerReady = (currentUser:LocalUser, army:Array<Unit>, session:Session) => {
     session.players.forEach((player) => {
         if(player.id===currentUser.id){
-            player.units = army
             player.isReady = true
         } 
+    })
+    army.forEach(unit => {
+        session.map[unit.y][unit.x].unit = unit
     })
     if(!session.players.find((player)=>!player.isReady)){
         session.status = MatchStatus.ACTIVE
@@ -40,7 +42,7 @@ export const onMatchStart = (currentUser:LocalUser, session:Session) => {
             players: session.players.map((player:Player) => {
                 return {
                     ...player,
-                    units: [],
+                    units: new Array(Maps.CrowBridge[0].length).fill(new Array(Maps.CrowBridge.length).fill(null)),
                     isReady:false
                 }
             }),
@@ -53,9 +55,11 @@ export const onMatchStart = (currentUser:LocalUser, session:Session) => {
 }
 
 export const onMoveUnit = (unit:Unit, session:Session) => {
-    session.players.forEach((player) => player.units.forEach((punit) => {
-        if(punit.id === unit.id) punit = {...unit}
+    session.map.forEach(row => row.forEach(tile => {
+        if(tile.unit && tile.unit.id === unit.id) delete tile.unit
     }))
+    session.map[unit.y][unit.x].unit = unit
+
     server.publishMessage({
         type:   Constants.ReducerActions.MATCH_UPDATE,
         sessionId: session.sessionId,
