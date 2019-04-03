@@ -44,7 +44,9 @@ export const Units = {
             ability: null as null,
             trait: Traits.FIRESHOCK,
             cost: 4,
-            level: 1
+            level: 1,
+            range: 2,
+            sight: 2
         },
         {
             name: 'Regular',
@@ -56,10 +58,12 @@ export const Units = {
             type: UnitType.REGULAR,
             rune: 'b',
             descriptions: ['regular description 1', 'regular description 2'],
-            ability: null,
+            ability: null as null,
             trait: Traits.BLOCK,
             cost: 4,
-            level: 1
+            level: 1,
+            range: 1,
+            sight: 2
         }
     ],
     [Army.DEAD]: [
@@ -76,7 +80,9 @@ export const Units = {
             ability: null as null,
             trait: Traits.WATERBREATH,
             cost: 1,
-            level: 1
+            level: 1,
+            range: 1,
+            sight: 1
         }
     ]
 

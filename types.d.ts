@@ -47,6 +47,8 @@ interface Unit {
     trait: Traits
     cost: number
     level: number
+    range: number
+    sight: number
 }
 
 interface Player {

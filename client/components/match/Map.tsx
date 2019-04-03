@@ -14,6 +14,8 @@ interface Props {
 interface State {
     selectedTile: Tile | null
     movingUnit: Unit | null
+    attackingUnit: Unit | null
+    highlightTiles: Array<Array<boolean>>
     startX: number
     startY: number
 }
@@ -23,6 +25,8 @@ export default class Map extends React.Component<Props, State> {
     state = {
         selectedTile: null as null,
         movingUnit: null as null,
+        attackingUnit: null as null,
+        highlightTiles: [[false]],
         startX: -1,
         startY: -1
     }
@@ -44,6 +48,7 @@ export default class Map extends React.Component<Props, State> {
                 unit.x = candidateTile.x
                 unit.y = candidateTile.y
                 unit.move--
+                candidateTile.unit = unit
                 this.setState({selectedTile: candidateTile}, 
                     ()=>onMoveUnit(unit, this.props.activeSession))
             }
@@ -72,6 +77,11 @@ export default class Map extends React.Component<Props, State> {
 
     }
 
+    showAttackTiles = (unit:Unit) => {
+        let highlightTiles = getTilesInRange(unit, this.props.map)
+        this.setState({attackingUnit: unit, highlightTiles})
+    }
+
     getUnitActionButtons = (activePlayer:Player, unit?:Unit) => {
         if(unit){
             let isOwner = unit.ownerId === activePlayer.id
@@ -79,7 +89,8 @@ export default class Map extends React.Component<Props, State> {
                 return <div>
                             {unit.move<unit.maxMove && this.state.movingUnit && <button onClick={()=>this.cancelMove(unit)}>Reset</button>}
                             {unit.move<unit.maxMove && this.state.movingUnit && <button onClick={()=>this.setState({movingUnit:null})}>Accept</button>}
-                            {unit.move===unit.maxMove && <button onClick={()=>this.setState({movingUnit: unit, startX: unit.x, startY: unit.y})}>Move</button>}
+                            {unit.move===unit.maxMove && !this.state.movingUnit && <button onClick={()=>this.setState({movingUnit: unit, startX: unit.x, startY: unit.y})}>Move</button>}
+                            <button onClick={()=>this.showAttackTiles(unit)}>Attack</button>
                             {unit.ability && <button onClick={()=>this.performSpecial(unit)}>{unit.ability}</button>}
                         </div>
             }
@@ -87,7 +98,7 @@ export default class Map extends React.Component<Props, State> {
         return <span/>
     }
 
-    getMoveArrowsOfTile = (tile:Tile, players:Array<Player>, movingUnit?:Unit) => {
+    getMoveArrowsOfTile = (tile:Tile, movingUnit?:Unit) => {
         let tileUnit = tile.unit
         if(tileUnit && movingUnit && tileUnit.id === movingUnit.id)
             return [
@@ -106,10 +117,10 @@ export default class Map extends React.Component<Props, State> {
                     {this.props.map.map((row, y) => 
                         <div style={{display:'flex'}}>
                             {row.map((tile:Tile, x) => 
-                                <div style={{...styles.tile, background: 'transparent'}} 
+                                <div style={{...styles.tile, background: this.state.highlightTiles[y] && this.state.highlightTiles[y][x]===true ? AppStyles.colors.red : 'transparent'}} 
                                     onClick={this.state.movingUnit ? null : ()=>this.setState({selectedTile: tile})}>
                                     <div style={{fontFamily:'Terrain', color: AppStyles.colors.white}}>{tile.subType}</div>
-                                    {this.state.movingUnit && this.getMoveArrowsOfTile(tile, this.props.players, this.state.movingUnit)}
+                                    {this.state.movingUnit && this.getMoveArrowsOfTile(tile, this.state.movingUnit)}
                                     {getUnitPortraitOfTile(tile, this.props.players, this.props.activePlayer)}
                                 </div>
                             )}
@@ -160,6 +171,23 @@ const getUnitOpacity = (unit:Unit, activePlayer:Player) => {
         //TODO determine closest owned unit to this unowned unit
         return 0.5
     }
+}
+
+const getTilesInRange = (unit:Unit, map:Array<Array<Tile>>) => {
+    let directions = [{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}]
+    let tiles = new Array(map.length).fill(null).map((item) => 
+                    new Array(map[0].length).fill(false))
+    directions.forEach((direction) => {
+        let candidateX = unit.x
+        let candidateY = unit.y
+        for(var i=unit.range; i>0; i--){
+            candidateX += direction.x
+            candidateY += direction.y
+            if(candidateY >= 0 && candidateX >= 0)
+                tiles[candidateY][candidateX] = true
+        }
+    })
+    return tiles
 }
 
 const styles = {

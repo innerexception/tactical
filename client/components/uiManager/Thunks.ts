@@ -42,7 +42,6 @@ export const onMatchStart = (currentUser:LocalUser, session:Session) => {
             players: session.players.map((player:Player) => {
                 return {
                     ...player,
-                    units: new Array(Maps.CrowBridge[0].length).fill(new Array(Maps.CrowBridge.length).fill(null)),
                     isReady:false
                 }
             }),

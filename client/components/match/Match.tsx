@@ -4,7 +4,6 @@ import { Button, Card, Dialog, Tooltip, NumericInput, Icon, Drawer, Radio, Radio
 import AppStyles from '../../AppStyles';
 import Map from './Map'
 import { MatchStatus, UnitType, Army, Units } from '../../../enum';
-import { arrayLengthCompare } from '@blueprintjs/core/lib/esm/common/utils';
 
 interface Props {
     currentUser: LocalUser
