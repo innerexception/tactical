@@ -46,7 +46,8 @@ export const Units = {
             cost: 4,
             level: 1,
             range: 2,
-            sight: 2
+            sight: 2,
+            attacks: 1
         },
         {
             name: 'Regular',
@@ -63,7 +64,8 @@ export const Units = {
             cost: 4,
             level: 1,
             range: 1,
-            sight: 2
+            sight: 2,
+            attacks: 1
         }
     ],
     [Army.DEAD]: [
@@ -82,7 +84,8 @@ export const Units = {
             cost: 1,
             level: 1,
             range: 1,
-            sight: 1
+            sight: 1,
+            attacks: 1
         }
     ]
 

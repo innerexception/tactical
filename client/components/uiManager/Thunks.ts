@@ -23,13 +23,7 @@ export const onPlayerReady = (currentUser:LocalUser, army:Array<Unit>, session:S
     if(!session.players.find((player)=>!player.isReady)){
         session.status = MatchStatus.ACTIVE
     }
-    server.publishMessage({
-        type: Constants.ReducerActions.MATCH_UPDATE,
-        sessionId: session.sessionId,
-        session: {
-            ...session
-        }
-    })
+    sendSessionUpdate(session)
 }
 
 export const onMatchStart = (currentUser:LocalUser, session:Session) => {
@@ -58,12 +52,21 @@ export const onMoveUnit = (unit:Unit, session:Session) => {
         if(tile.unit && tile.unit.id === unit.id) delete tile.unit
     }))
     session.map[unit.y][unit.x].unit = unit
+    sendSessionUpdate(session)
+}
 
-    server.publishMessage({
-        type:   Constants.ReducerActions.MATCH_UPDATE,
-        sessionId: session.sessionId,
-        session
-    })
+export const onAttackTile = (attacker:Unit, tile:Tile, session:Session) => {
+    const target = tile.unit
+    target.hp -= attacker.atk
+    attacker.move = 0
+    attacker.attacks--
+
+    session.map[attacker.y][attacker.x].unit = {...attacker}
+    if(target.hp > 0)
+        session.map[target.y][target.x].unit = {...target}
+    else delete session.map[target.y][target.x].unit
+
+    sendSessionUpdate(session)
 }
 
 export const onMatchTick = (session:Session) => {
@@ -96,5 +99,15 @@ export const onMatchLost = (session:Session) => {
 export const onCleanSession = () => {
     dispatch({
         type:   Constants.ReducerActions.MATCH_CLEANUP
+    })
+}
+
+const sendSessionUpdate = (session:Session) => {
+    server.publishMessage({
+        type: Constants.ReducerActions.MATCH_UPDATE,
+        sessionId: session.sessionId,
+        session: {
+            ...session
+        }
     })
 }

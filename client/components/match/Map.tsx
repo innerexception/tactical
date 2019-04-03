@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { onMoveUnit } from '../uiManager/Thunks'
+import { onMoveUnit, onAttackTile } from '../uiManager/Thunks'
 import { Button, Card, Dialog, Tooltip, Position, Icon, Drawer, RadioGroup, Popover } from '@blueprintjs/core'
 import AppStyles from '../../AppStyles';
 import { Directions, TileType } from '../../../enum'
@@ -87,7 +87,11 @@ export default class Map extends React.Component<Props, State> {
     }
 
     performAttackOnTile = (tile:Tile) => {
-
+        if(tile.unit){
+            //TODO flash/shake tile's unit here
+            onAttackTile(this.state.attackingUnit, tile, this.props.activeSession)
+        }
+        this.hideAttackTiles()
     }
 
     getUnitActionButtons = (activePlayer:Player, unit?:Unit) => {
@@ -99,8 +103,9 @@ export default class Map extends React.Component<Props, State> {
                     buttons.push(<button onClick={this.hideAttackTiles}>Cancel</button>)
                 }
                 if(!this.state.attackingUnit){
-                    if(!this.state.movingUnit) 
-                        buttons.push(<button onClick={()=>this.showAttackTiles(unit)}>Attack</button>)
+                    if(this.state.selectedTile && (this.state.selectedTile as any).unit && (this.state.selectedTile as any).unit.attacks > 0)
+                        if(!this.state.movingUnit) 
+                            buttons.push(<button onClick={()=>this.showAttackTiles(unit)}>Attack</button>)
                 }
                 if(this.state.movingUnit){
                     if(unit.move<unit.maxMove){

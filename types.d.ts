@@ -49,6 +49,7 @@ interface Unit {
     level: number
     range: number
     sight: number
+    attacks: number
 }
 
 interface Player {
