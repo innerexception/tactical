@@ -69,7 +69,7 @@ export default class Map extends React.Component<Props, State> {
         unit.move = unit.maxMove
         unit.x = this.state.startX
         unit.y = this.state.startY
-        this.setState({movingUnit: null})
+        this.setState({selectedTile: this.props.map[unit.y][unit.x], movingUnit: null, attackingUnit: null, highlightTiles: [[false]]})
         onMoveUnit(unit, this.props.activeSession)
     }
 
@@ -82,16 +82,39 @@ export default class Map extends React.Component<Props, State> {
         this.setState({attackingUnit: unit, highlightTiles})
     }
 
+    hideAttackTiles = () => {
+        this.setState({attackingUnit: null, highlightTiles:[[false]]})
+    }
+
+    performAttackOnTile = (tile:Tile) => {
+
+    }
+
     getUnitActionButtons = (activePlayer:Player, unit?:Unit) => {
         if(unit){
             let isOwner = unit.ownerId === activePlayer.id
             if(isOwner){
+                let buttons = []
+                if(this.state.attackingUnit){
+                    buttons.push(<button onClick={this.hideAttackTiles}>Cancel</button>)
+                }
+                if(!this.state.attackingUnit){
+                    if(!this.state.movingUnit) 
+                        buttons.push(<button onClick={()=>this.showAttackTiles(unit)}>Attack</button>)
+                }
+                if(this.state.movingUnit){
+                    if(unit.move<unit.maxMove){
+                        buttons.push(<button onClick={()=>this.setState({movingUnit:null})}>Accept</button>)
+                        buttons.push(<button onClick={()=>this.cancelMove(unit)}>Reset</button>)
+                    }
+                }
+                if(!this.state.movingUnit && !this.state.attackingUnit){
+                    if(unit.move===unit.maxMove) buttons.push(<button onClick={()=>this.setState({movingUnit: unit, startX: unit.x, startY: unit.y, attackingUnit:null, highlightTiles:[[false]]})}>Move</button>)
+                }
+                if(unit.ability) buttons.push(<button onClick={()=>this.performSpecial(unit)}>{unit.ability}</button>)
+
                 return <div>
-                            {unit.move<unit.maxMove && this.state.movingUnit && <button onClick={()=>this.cancelMove(unit)}>Reset</button>}
-                            {unit.move<unit.maxMove && this.state.movingUnit && <button onClick={()=>this.setState({movingUnit:null})}>Accept</button>}
-                            {unit.move===unit.maxMove && !this.state.movingUnit && <button onClick={()=>this.setState({movingUnit: unit, startX: unit.x, startY: unit.y, attackingUnit:null, highlightTiles:[[false]]})}>Move</button>}
-                            <button onClick={()=>this.showAttackTiles(unit)}>Attack</button>
-                            {unit.ability && <button onClick={()=>this.performSpecial(unit)}>{unit.ability}</button>}
+                            {buttons}
                         </div>
             }
         }
@@ -110,6 +133,12 @@ export default class Map extends React.Component<Props, State> {
         return <span/>
     }
 
+    getTileClickHandler = (tile:Tile) => {
+        if(this.state.movingUnit) return null
+        if(this.state.attackingUnit) return ()=>this.performAttackOnTile(tile)
+        return ()=>this.setState({selectedTile: tile, attackingUnit:null, highlightTiles:[[false]]})
+    }
+
     render(){
         return (
             <div style={styles.frame}>
@@ -118,7 +147,7 @@ export default class Map extends React.Component<Props, State> {
                         <div style={{display:'flex'}}>
                             {row.map((tile:Tile, x) => 
                                 <div style={{...styles.tile, background: this.state.highlightTiles[y] && this.state.highlightTiles[y][x]===true ? AppStyles.colors.red : 'transparent'}} 
-                                    onClick={this.state.movingUnit ? null : ()=>this.setState({selectedTile: tile, attackingUnit:null, highlightTiles:[[false]]})}>
+                                    onClick={this.getTileClickHandler(tile)}>
                                     <div style={{fontFamily:'Terrain', color: AppStyles.colors.white}}>{tile.subType}</div>
                                     {this.state.movingUnit && this.getMoveArrowsOfTile(tile, this.state.movingUnit)}
                                     {getUnitPortraitOfTile(tile, this.props.players, this.props.activePlayer)}
