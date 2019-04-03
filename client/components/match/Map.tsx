@@ -89,7 +89,7 @@ export default class Map extends React.Component<Props, State> {
                 return <div>
                             {unit.move<unit.maxMove && this.state.movingUnit && <button onClick={()=>this.cancelMove(unit)}>Reset</button>}
                             {unit.move<unit.maxMove && this.state.movingUnit && <button onClick={()=>this.setState({movingUnit:null})}>Accept</button>}
-                            {unit.move===unit.maxMove && !this.state.movingUnit && <button onClick={()=>this.setState({movingUnit: unit, startX: unit.x, startY: unit.y})}>Move</button>}
+                            {unit.move===unit.maxMove && !this.state.movingUnit && <button onClick={()=>this.setState({movingUnit: unit, startX: unit.x, startY: unit.y, attackingUnit:null, highlightTiles:[[false]]})}>Move</button>}
                             <button onClick={()=>this.showAttackTiles(unit)}>Attack</button>
                             {unit.ability && <button onClick={()=>this.performSpecial(unit)}>{unit.ability}</button>}
                         </div>
@@ -118,7 +118,7 @@ export default class Map extends React.Component<Props, State> {
                         <div style={{display:'flex'}}>
                             {row.map((tile:Tile, x) => 
                                 <div style={{...styles.tile, background: this.state.highlightTiles[y] && this.state.highlightTiles[y][x]===true ? AppStyles.colors.red : 'transparent'}} 
-                                    onClick={this.state.movingUnit ? null : ()=>this.setState({selectedTile: tile})}>
+                                    onClick={this.state.movingUnit ? null : ()=>this.setState({selectedTile: tile, attackingUnit:null, highlightTiles:[[false]]})}>
                                     <div style={{fontFamily:'Terrain', color: AppStyles.colors.white}}>{tile.subType}</div>
                                     {this.state.movingUnit && this.getMoveArrowsOfTile(tile, this.state.movingUnit)}
                                     {getUnitPortraitOfTile(tile, this.props.players, this.props.activePlayer)}
