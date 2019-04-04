@@ -18,6 +18,7 @@ export default class Lobby extends React.Component<Props> {
 
     getErrors = () => {
         if(this.props.activeSession.players.length < 2) return 'Waiting for more to join...'
+        if(this.props.activeSession.players.length > 4) return 'Too many players in match...'
     }
 
     render(){

@@ -33,13 +33,14 @@ export const onMatchStart = (currentUser:LocalUser, session:Session) => {
         session: {
             status: MatchStatus.SETUP,
             activePlayerId: currentUser.id,
-            players: session.players.map((player:Player) => {
+            players: session.players.map((player:Player, i) => {
                 return {
                     ...player,
-                    isReady:false
+                    isReady:false,
+                    spawn: Maps.CrowBridge.SpawnPoints[i]
                 }
             }),
-            map: Maps.CrowBridge,
+            map: Maps.CrowBridge.Map,
             ticks: 0,
             turnTickLimit: 100000
         }

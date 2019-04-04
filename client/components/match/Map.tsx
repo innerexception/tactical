@@ -153,7 +153,7 @@ export default class Map extends React.Component<Props, State> {
                             {row.map((tile:Tile, x) => 
                                 <div style={{...styles.tile, background: this.state.highlightTiles[y] && this.state.highlightTiles[y][x]===true ? AppStyles.colors.grey2 : 'transparent'}} 
                                     onClick={this.getTileClickHandler(tile)}>
-                                    <div style={{fontFamily:'Terrain', color: AppStyles.colors.white}}>{tile.subType}</div>
+                                    <div style={{fontFamily:'Terrain', color: AppStyles.colors.grey3, fontSize:'2em'}}>{tile.subType}</div>
                                     {this.state.movingUnit && this.getMoveArrowsOfTile(tile, this.state.movingUnit)}
                                     {getUnitPortraitOfTile(tile, this.props.players, this.props.activePlayer)}
                                 </div>
@@ -173,7 +173,7 @@ export default class Map extends React.Component<Props, State> {
 const getUnitPortraitOfTile = (tile:Tile, players:Array<Player>, activePlayer:Player) => {
     let tileUnit = tile.unit
     if(tileUnit){
-        return <div style={{opacity: getUnitOpacity(tileUnit, activePlayer)}}>
+        return <div style={{opacity: getUnitOpacity(tileUnit, activePlayer), textAlign:'right', position:'absolute', top:0, right:0}}>
                     <span>{tileUnit.rune}</span>
                     <div>{new Array(tileUnit.level).fill(null).map((lvl) =>  <div style={{...styles.levelBarOuter}}/>)}</div>
                     <div>{new Array(tileUnit.hp).fill(null).map((lvl) =>  <span>*</span>)}</div>
@@ -188,7 +188,7 @@ const getUnitInfoOfTile = (tile:Tile, activePlayer:Player) => {
         let isOwner = unit.ownerId === activePlayer.id
         return <div>
                     <h4>{tile.type}</h4>
-                    <h4>{unit.descriptions[Math.floor(Math.random() * Math.floor(unit.descriptions.length))]}</h4>
+                    <h4>{unit.descriptions[Math.floor(Math.random() * Math.floor(unit.descriptions.length))]}</h4> //TODO initalize this on unit create
                     {isOwner && <h4>M: {unit.move} / {unit.maxMove}</h4>}
                </div>
     }
@@ -226,12 +226,9 @@ const getTilesInRange = (unit:Unit, map:Array<Array<Tile>>) => {
 
 const styles = {
     frame: {
-        padding:'3em',
         position:'relative' as 'relative',
-        backgroundImage: 'url(./build'+require('../../assets/basemap.jpg')+')',
-        backgroundPosition:'center',
-        backgroundRepeat: 'no-repeat',
-        backgroundSize: 'cover'
+        backgroundImage: 'url(./build'+require('../../assets/whiteTile.png')+')',
+        backgroundRepeat: 'repeat'
     },
     tile: {
         width: '2em',

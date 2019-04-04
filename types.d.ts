@@ -56,6 +56,7 @@ interface Player {
     name: string
     id: string
     isReady: boolean
+    spawn: {x:number, y:number}
 }
 
 interface Tile {
