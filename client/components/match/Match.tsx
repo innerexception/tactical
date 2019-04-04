@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { onMatchTick, onPlayerReady } from '../uiManager/Thunks'
+import { onMatchTick, onPlayerReady, onEndTurn } from '../uiManager/Thunks'
 import { Button, Card, Dialog, Tooltip, NumericInput, Icon, Drawer, Radio, RadioGroup, Popover } from '@blueprintjs/core'
 import AppStyles from '../../AppStyles';
 import Map from './Map'
@@ -23,7 +23,7 @@ export default class Match extends React.Component<Props, State> {
 
     state = {
         interval: 0,
-        isActive: false,
+        isActive: this.props.activeSession.activePlayerId === this.props.currentUser.id,
         showMatchOptions: false,
         army: Array<Unit>(),
         armyType: Army.LIVING,
@@ -36,7 +36,7 @@ export default class Match extends React.Component<Props, State> {
 
     endTurn = () => {
         clearInterval(this.state.interval)
-        // onEndTurn(this.props.currentUser, this.props.activeSession)
+        onEndTurn(this.props.activeSession)
     }
 
     setUnitTypeCount = (count:number, type:UnitType) => {

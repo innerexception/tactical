@@ -1,6 +1,6 @@
 @font-face {
-  font-family: 'Norse';
-  src: url('./assets/Norse.ttf')  format('truetype')
+  font-family: 'Venice';
+  src: url('./assets/VeniceClassic.ttf')  format('truetype')
 }
 
 @font-face {
@@ -19,8 +19,9 @@ html {
 }
 
 body {
-  font-family: 'Norse';
-  font-size: calc(14px + 1vw);
+  font-family: 'Venice';
+  font-size: calc(10px + 1vw);
+  line-height: unset
 }
 
 @keyframes shake {

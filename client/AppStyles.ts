@@ -20,9 +20,10 @@ export default {
         overflow:'auto'
     },
     colors: {
-        white: '#f7e7c6',
-        orange: '#d68e49',
-        red: '#a63725',
-        blue:'#331e50'
+        white: '#f3f3f3',
+        grey1: '#d5d5d5',
+        grey2: '#b3b3b3',
+        grey3:'#5f5f5f',
+        black:'#252525'
     }
 }

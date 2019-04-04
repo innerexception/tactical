@@ -70,30 +70,24 @@ export const onAttackTile = (attacker:Unit, tile:Tile, session:Session) => {
 }
 
 export const onMatchTick = (session:Session) => {
-    server.publishMessage({
-        type:   Constants.ReducerActions.MATCH_UPDATE,
-        sessionId: session.sessionId,
-        session: {
-            ...session,
-            ticks: session.ticks++
-        }
-    })
+    session.ticks++
+    sendSessionUpdate(session)
+}
+
+export const onEndTurn = (session:Session) => {
+    session.activePlayerId = session.players.find((player) => player.id !== session.activePlayerId).id
+    session.ticks = 0
+    sendSessionUpdate(session)
 }
 
 export const onMatchWon = (session:Session) => {
     session.status = MatchStatus.WIN
-    server.publishMessage({
-        type:   Constants.ReducerActions.MATCH_UPDATE,
-        sessionId: session.sessionId
-    })
+    sendSessionUpdate(session)
 }
 
 export const onMatchLost = (session:Session) => {
     session.status = MatchStatus.LOSE
-    server.publishMessage({
-        type:   Constants.ReducerActions.MATCH_UPDATE,
-        sessionId: session.sessionId
-    })
+    sendSessionUpdate(session)
 }
 
 export const onCleanSession = () => {

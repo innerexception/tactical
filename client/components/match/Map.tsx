@@ -151,7 +151,7 @@ export default class Map extends React.Component<Props, State> {
                     {this.props.map.map((row, y) => 
                         <div style={{display:'flex'}}>
                             {row.map((tile:Tile, x) => 
-                                <div style={{...styles.tile, background: this.state.highlightTiles[y] && this.state.highlightTiles[y][x]===true ? AppStyles.colors.red : 'transparent'}} 
+                                <div style={{...styles.tile, background: this.state.highlightTiles[y] && this.state.highlightTiles[y][x]===true ? AppStyles.colors.grey2 : 'transparent'}} 
                                     onClick={this.getTileClickHandler(tile)}>
                                     <div style={{fontFamily:'Terrain', color: AppStyles.colors.white}}>{tile.subType}</div>
                                     {this.state.movingUnit && this.getMoveArrowsOfTile(tile, this.state.movingUnit)}
