@@ -11,13 +11,15 @@ export const onLogin = (currentUser:LocalUser, sessionId:string) => {
     server.publishMessage({type: Constants.ReducerActions.PLAYER_AVAILABLE, currentUser, sessionId})
 }
 
-export const onPlayerReady = (currentUser:LocalUser, army:Array<Unit>, session:Session) => {
+export const onPlayerReady = (currentUser:Player, army:Array<Unit>, session:Session) => {
     session.players.forEach((player) => {
         if(player.id===currentUser.id){
             player.isReady = true
         } 
     })
     army.forEach(unit => {
+        unit.x+=currentUser.spawn.x
+        unit.y+= currentUser.spawn.y
         session.map[unit.x][unit.y].unit = unit
     })
     if(!session.players.find((player)=>!player.isReady)){

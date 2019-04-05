@@ -38,8 +38,6 @@ export default class ArmyBuilder extends React.Component<Props, State> {
     }
 
     setUnitCoords = (unit:Unit, x:number, y:number) => {
-        x+=this.props.me.spawn.x
-        y+= this.props.me.spawn.y
         let army = this.state.army.map((aunit) => {
             if(aunit.id === unit.id) return {...aunit, x, y}
             return aunit
