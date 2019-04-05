@@ -1,8 +1,9 @@
 import * as React from 'react'
 import { onMoveUnit, onAttackTile } from '../uiManager/Thunks'
-import { Button, Card, Dialog, Tooltip, Position, Icon, PopoverInteractionKind, RadioGroup, Popover } from '@blueprintjs/core'
+import { Card, Dialog, Tooltip, Position, Icon, PopoverInteractionKind, RadioGroup, Popover } from '@blueprintjs/core'
 import AppStyles from '../../AppStyles';
 import { Directions, TileType } from '../../../enum'
+import { Button, LightButton } from '../Shared'
 
 interface Props {
     activeSession: Session
@@ -100,27 +101,27 @@ export default class Map extends React.Component<Props, State> {
             if(isOwner){
                 let buttons = []
                 if(this.state.attackingUnit){
-                    buttons.push(<button onClick={this.hideAttackTiles}>Cancel</button>)
+                    buttons.push(LightButton(true, this.hideAttackTiles, 'Cancel'))
                 }
                 if(!this.state.attackingUnit){
                     if(this.state.selectedTile && (this.state.selectedTile as any).unit && (this.state.selectedTile as any).unit.attacks > 0)
                         if(!this.state.movingUnit) 
-                            buttons.push(<button onClick={()=>this.showAttackTiles(unit)}>Attack</button>)
+                            buttons.push(LightButton(true, ()=>this.showAttackTiles(unit), 'Attack'))
                 }
                 if(this.state.movingUnit){
                     if(unit.move<unit.maxMove){
-                        buttons.push(<button onClick={()=>this.setState({movingUnit:null})}>Accept</button>)
-                        buttons.push(<button onClick={()=>this.cancelMove(unit)}>Reset</button>)
+                        buttons.push(LightButton(true, ()=>this.setState({movingUnit:null}), 'Accept'))
+                        buttons.push(LightButton(true, ()=>this.cancelMove(unit), 'Reset'))
                     }
                 }
                 if(!this.state.movingUnit && !this.state.attackingUnit){
-                    if(unit.move===unit.maxMove) buttons.push(<button onClick={()=>this.setState({movingUnit: unit, startX: unit.x, startY: unit.y, attackingUnit:null, highlightTiles:[[false]]})}>Move</button>)
+                    if(unit.move===unit.maxMove) buttons.push(LightButton(true, ()=>this.setState({movingUnit: unit, startX: unit.x, startY: unit.y, attackingUnit:null, highlightTiles:[[false]]}), 'Move'))
                 }
-                if(unit.ability) buttons.push(<button onClick={()=>this.performSpecial(unit)}>{unit.ability}</button>)
+                if(unit.ability) buttons.push(LightButton(true, ()=>this.performSpecial(unit), unit.ability))
 
                 return <div>
                             {buttons}
-                        </div>
+                       </div>
             }
         }
         return <span/>
@@ -146,58 +147,69 @@ export default class Map extends React.Component<Props, State> {
 
     render(){
         return (
-            <div style={styles.frame}>
-                <div>
-                    {this.props.map.map((row, y) => 
-                        <div style={{display:'flex'}}>
-                            {row.map((tile:Tile, x) => 
-                                <div style={{...styles.tile, background: this.state.highlightTiles[y] && this.state.highlightTiles[y][x]===true ? AppStyles.colors.grey2 : 'transparent'}} 
-                                    onClick={this.getTileClickHandler(tile)}>
-                                    <div style={{fontFamily:'Terrain', color: AppStyles.colors.grey3, fontSize:'2em'}}>{tile.subType}</div>
-                                    {this.state.movingUnit && this.getMoveArrowsOfTile(tile, this.state.movingUnit)}
-                                    {getUnitPortraitOfTile(tile, this.props.activePlayer, this.getUnitActionButtons)}
-                                </div>
-                            )}
-                        </div>
-                    )}
+            <div>
+                {getUnitInfoOfTile(this.state.selectedTile, this.props.activePlayer, this.getUnitActionButtons)}
+                <div style={styles.mapFrame}>
+                    <div>
+                        {this.props.map.map((row, y) => 
+                            <div style={{display:'flex'}}>
+                                {row.map((tile:Tile, x) => 
+                                    <div style={{
+                                            ...styles.tile, 
+                                            background: this.state.highlightTiles[y] && this.state.highlightTiles[y][x]===true ? AppStyles.colors.grey2 : 'transparent',
+                                            borderStyle: isSelectedTile(tile, this.state.selectedTile) ? 'dashed' : 'none'
+                                        }} 
+                                        onClick={this.getTileClickHandler(tile)}>
+                                        <div style={{fontFamily:'Terrain', color: AppStyles.colors.grey3, fontSize:'2em'}}>{tile.subType}</div>
+                                        {this.state.movingUnit && this.getMoveArrowsOfTile(tile, this.state.movingUnit)}
+                                        {getUnitPortraitOfTile(tile, this.props.activePlayer)}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>  
                 </div>
             </div>
+            
         )
     }
 }
 
-const getUnitPortraitOfTile = (tile:Tile, activePlayer:Player, getUnitActionButtons:Function) => {
+const getUnitPortraitOfTile = (tile:Tile, activePlayer:Player) => {
     let tileUnit = tile.unit
     if(tileUnit){
         return <div style={{opacity: getUnitOpacity(tileUnit, activePlayer), textAlign:'right', position:'absolute', top:0, right:0}}>
+                    <span>{tileUnit.rune}</span>
                     <div>{new Array(tileUnit.level).fill(null).map((lvl) =>  <div style={{...styles.levelBarOuter}}/>)}</div>
                     <div>{new Array(tileUnit.hp).fill(null).map((lvl) =>  <span>*</span>)}</div>
-                    <Popover
-                        content={getUnitInfoOfTile(tile, activePlayer, getUnitActionButtons)}
-                        interactionKind={PopoverInteractionKind.CLICK}
-                        position={Position.RIGHT}>
-                            <span>{tileUnit.rune}</span>
-                    </Popover>
                </div>
     }
     return <span/>
 }
 
 const getUnitInfoOfTile = (tile:Tile, activePlayer:Player, getUnitActionButtons:Function) => {
-    let unit = tile.unit
-    if(unit){
-        let isOwner = unit.ownerId === activePlayer.id
-        return <div>
-                    <h4>{tile.type}</h4>
-                    <h4>{unit.descriptions[Math.floor(Math.random() * Math.floor(unit.descriptions.length))]}</h4> //TODO initalize this on unit create
-                    {isOwner && <h4>M: {unit.move} / {unit.maxMove}</h4>}
-                    {getUnitActionButtons(activePlayer, unit)}
-               </div>
+    if(tile){
+        let unit = tile.unit
+        if(unit){
+            let isOwner = unit.ownerId === activePlayer.id
+            return <div style={styles.tileInfo}>
+                        <div>
+                            <h4 style={{margin:0}}>{tile.type}</h4>
+                            <h4 style={{margin:0}}>{unit.type}</h4>
+                            <h4 style={{margin:0}}>{unit.description}</h4>
+                        </div>
+                        <div>
+                            {isOwner && <h4 style={{margin:0}}>M: {unit.move} / {unit.maxMove}</h4>}
+                            {getUnitActionButtons(activePlayer, unit)}
+                        </div>
+                </div>
+        }
+        else 
+            return <div style={styles.tileInfo}>
+                        <h4>{tile.type}</h4>
+                    </div>
     }
-    else 
-        return <div>
-                    <h4>{tile.type}</h4>
-               </div>
+    return <div style={styles.tileInfo}></div>
 }
 
 const getUnitOpacity = (unit:Unit, activePlayer:Player) => {
@@ -226,20 +238,36 @@ const getTilesInRange = (unit:Unit, map:Array<Array<Tile>>) => {
     return tiles
 }
 
+const isSelectedTile = (tile:Tile, selectedTile?:Tile) => {
+    if(selectedTile){
+        return tile.x === selectedTile.x && tile.y === selectedTile.y
+    }
+    return false
+}
+
 const styles = {
-    frame: {
+    mapFrame: {
         position:'relative' as 'relative',
         backgroundImage: 'url(./build'+require('../../assets/whiteTile.png')+')',
         backgroundRepeat: 'repeat'
     },
+    tileInfo: {
+        height: '5em',
+        backgroundImage: 'url(./build'+require('../../assets/whiteTile.png')+')',
+        backgroundRepeat: 'repeat',
+        marginBottom: '0.5em',
+        padding: '0.5em',
+        border: '1px dotted',
+        display:'flex'
+    },
     tile: {
         width: '2em',
         height:'2em',
-        border: '1px dashed',
+        border: '1px',
         position:'relative' as 'relative'
     },
     levelBarOuter: {
-        width:'100%',
+        height:'0.25em',
         background: AppStyles.colors.white
     },
     leftArrow: {

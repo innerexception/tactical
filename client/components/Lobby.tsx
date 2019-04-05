@@ -23,7 +23,7 @@ export default class Lobby extends React.Component<Props> {
 
     render(){
         return (
-            <div style={AppStyles.window}>
+            <div style={{...AppStyles.window, padding:'0.5em'}}>
                 <h2 style={{textAlign:'center', margin:0}}>MacTactics</h2>
                 <hr/>
                 <h3>{this.props.activeSession.sessionId} Lobby</h3>

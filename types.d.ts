@@ -21,10 +21,7 @@ declare enum TileType {
     HILL='HILL',
     GRASS='GRASS'
 }
-declare module "*.jpg" {
-    const value: any;
-    export = value;
-}
+
 interface LocalUser {
     name:string
     id:string
@@ -43,6 +40,7 @@ interface Unit {
     type: UnitType
     rune: string
     descriptions: Array<string>
+    description: string
     ability: Abilities
     trait: Traits
     cost: number

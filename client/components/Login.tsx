@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { onLogin } from './uiManager/Thunks'
 import AppStyles from '../AppStyles';
+import { Button } from './Shared'
 
 export default class Login extends React.Component {
     state = { name: '', sessionId: ''}
@@ -8,7 +9,7 @@ export default class Login extends React.Component {
     render(){
         return (
             <div>
-                <div style={AppStyles.window}>
+                <div style={{...AppStyles.window, padding:'0.5em'}}>
                     <h2 style={{textAlign:'center', margin:0}}>MacTactics</h2>
                     <hr/>
                     <h3 style={{margin:'0'}}>Handle</h3>
@@ -21,12 +22,6 @@ export default class Login extends React.Component {
         )
     }
 }
-
-export const Button = (enabled:boolean, handler:any, text:string) => 
-    <div style={{...AppStyles.buttonOuter, pointerEvents: enabled ? 'all' : 'none'}} 
-         onClick={handler}>
-        <div style={{border:'1px solid', borderRadius: '3px', opacity: enabled ? 1 : 0.5, }}>{text}</div>
-    </div>
 
 const getUser = (name:string) => {
    return {name,id: Date.now() + ''+ Math.random()}

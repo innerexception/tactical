@@ -1,10 +1,11 @@
 import * as React from 'react'
 import { onMatchTick, onPlayerReady, onEndTurn } from '../uiManager/Thunks'
 import { Radio, RadioGroup } from '@blueprintjs/core'
-import { Button } from '../Login'
+import { Button } from '../Shared'
 import AppStyles from '../../AppStyles';
 import Map from './Map'
 import { MatchStatus, UnitType, Army, Units } from '../../../enum';
+import { TopBar } from '../Shared'
 import ArmyBuilder from './ArmyBuilder';
 
 interface Props {
@@ -84,29 +85,23 @@ export default class Match extends React.Component<Props, State> {
 
         return (
             <div style={AppStyles.window}>
-                <Map map={this.props.activeSession.map} 
-                     activePlayer={me}
-                     activeSession={this.props.activeSession}
-                     players={this.props.activeSession.players}/>
-                <div style={{...styles.modal, display: this.state.showMatchOptions ? 'flex':'none'}}>
-                    <div style={{display:'flex'}}>
-                        options menu
+                {TopBar('MacTactics')}
+                <div style={{padding:'0.5em'}}>
+                    <Map map={this.props.activeSession.map} 
+                        activePlayer={me}
+                        activeSession={this.props.activeSession}
+                        players={this.props.activeSession.players}/>
+                    <div style={{...styles.modal, display: this.state.showMatchOptions ? 'flex':'none'}}>
+                        <div style={{display:'flex'}}>
+                            options menu
+                        </div>
                     </div>
+                    <ArmyBuilder activeSession={this.props.activeSession} me={me}/>
                 </div>
-                <ArmyBuilder activeSession={this.props.activeSession} me={me}/>
          </div>
         )
     }
 }
-
-const getUnitCount = (army:Array<Unit>, unitType:UnitType) => army.filter((aunit)=>aunit.type === unitType).length
-
-export const TopBar = (text:string) => 
-    <div style={styles.topBar}>
-        <div style={{width:'33%'}}><hr style={styles.hr}/><hr style={styles.hr}/><hr style={styles.hr}/><hr style={styles.hr}/></div>
-            {text}
-        <div style={{width:'33%'}}><hr style={styles.hr}/><hr style={styles.hr}/><hr style={styles.hr}/><hr style={styles.hr}/></div>
-    </div>
 
 const styles = {
     frame: {
@@ -155,18 +150,6 @@ const styles = {
         border:'1px solid',
         borderRadius: '3px',
         padding:'0.5em'
-    },
-    topBar: {
-        background: 'white',
-        display:'flex',
-        justifyContent:'space-around',
-        alignItems: 'center',
-        borderTopLeftRadius: '5px',
-        borderTopRightRadius: '5px',
-    },
-    hr: {
-        margin:0,
-        marginBottom:'1px'
     },
     scrollContainer: {
         overflow: 'auto',

@@ -29,8 +29,7 @@ export default {
     window: {
         background: '#f3f3f3',
         borderRadius: '5px',
-        border: '1px solid',
-        padding:'0.5em'
+        border: '1px solid'
     },
     buttonOuter: {
         color: '#252525', 
@@ -42,5 +41,24 @@ export default {
         width:'50%',
         marginLeft:'50%',
         padding:'2px'
-    }
+    },
+    buttonInner: {
+        border:'1px solid', borderRadius: '3px', paddingLeft:'5px', paddingRight:'5px' ,
+        color: '#252525', 
+        background:'white',
+        cursor:'pointer'
+    },
+    topBar: {
+        background: 'white',
+        display:'flex',
+        justifyContent:'space-around',
+        alignItems: 'center',
+        borderTopLeftRadius: '5px',
+        borderTopRightRadius: '5px',
+        borderBottom: '1px solid'
+    },
+    hr: {
+        margin:0,
+        marginBottom:'1px'
+    },
 }

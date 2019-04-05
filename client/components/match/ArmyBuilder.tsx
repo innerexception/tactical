@@ -1,9 +1,8 @@
 import * as React from 'react'
 import { onMatchTick, onPlayerReady, onEndTurn } from '../uiManager/Thunks'
 import { Radio, RadioGroup } from '@blueprintjs/core'
-import { Button } from '../Login'
 import AppStyles from '../../AppStyles';
-import { TopBar } from './Match'
+import { TopBar, Button } from '../Shared'
 import { MatchStatus, UnitType, Army, Units } from '../../../enum';
 
 interface Props {
@@ -48,7 +47,8 @@ export default class ArmyBuilder extends React.Component<Props, State> {
                 x:i,
                 y:0, //TODO x/y should be set by player somehow
                 id: Date.now()+''+Math.random(),
-                ownerId: this.props.me.id
+                ownerId: this.props.me.id,
+                description: unit.descriptions[Math.floor(Math.random() * Math.floor(unit.descriptions.length))]
             }
         })
         onPlayerReady(this.props.me, this.state.army, this.props.activeSession)
