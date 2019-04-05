@@ -1,6 +1,43 @@
 import { TileType, TileSubType } from "../../enum";
 
 export default {
+    StagingArea: [ 
+        [
+            {type:TileType.GRASS}, 
+            {type:TileType.GRASS},
+            {type:TileType.GRASS}
+        ],
+        [
+            {type:TileType.GRASS}, 
+            {type:TileType.GRASS},
+            {type:TileType.GRASS}
+        ],
+        [
+            {type:TileType.GRASS}, 
+            {type:TileType.GRASS},
+            {type:TileType.GRASS}
+        ],
+        [
+            {type:TileType.GRASS}, 
+            {type:TileType.GRASS},
+            {type:TileType.GRASS}
+        ],
+        [
+            {type:TileType.GRASS}, 
+            {type:TileType.GRASS},
+            {type:TileType.GRASS}
+        ],
+        [
+            {type:TileType.GRASS}, 
+            {type:TileType.GRASS},
+            {type:TileType.GRASS}
+        ],
+        [
+            {type:TileType.GRASS}, 
+            {type:TileType.GRASS},
+            {type:TileType.GRASS}
+        ],
+    ],
     CrowBridge: {
         SpawnPoints: [
             {x:3, y:0},

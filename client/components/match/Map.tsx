@@ -249,7 +249,10 @@ const styles = {
     mapFrame: {
         position:'relative' as 'relative',
         backgroundImage: 'url(./build'+require('../../assets/whiteTile.png')+')',
-        backgroundRepeat: 'repeat'
+        backgroundRepeat: 'repeat',
+        overflow:'auto',
+        maxHeight:'60vh',
+        maxWidth:'100%'
     },
     tileInfo: {
         height: '5em',

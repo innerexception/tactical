@@ -17,9 +17,6 @@ interface State {
     isActive: boolean
     interval: NodeJS.Timeout | number
     showMatchOptions: boolean
-    army: Array<Unit>
-    armyType: Army
-    points: number
     me: Player
 }
 
@@ -30,9 +27,6 @@ export default class Match extends React.Component<Props, State> {
         isActive: this.props.activeSession.activePlayerId === this.props.currentUser.id,
         me: this.props.activeSession.players.find(player=>player.id===this.props.currentUser.id),
         showMatchOptions: false,
-        army: Array<Unit>(),
-        armyType: Army.LIVING,
-        points: 30
     }
 
     componentDidMount = () => {
@@ -42,33 +36,6 @@ export default class Match extends React.Component<Props, State> {
     endTurn = () => {
         clearInterval(this.state.interval)
         onEndTurn(this.props.activeSession)
-    }
-
-    setUnitTypeCount = (count:number, type:UnitType) => {
-        let army = this.state.army.filter((unit) => unit.type !== type)
-        army = army.concat(new Array(count).fill(
-            {...Units[this.state.armyType].find((unit) => unit.type === type)}
-        ))
-        this.setState({army, points: 30 - this.getArmyValue(army)})
-    }
-
-    getArmyValue = (army:Array<Unit>) => {
-        let cost = 0
-        army.forEach((unit) => cost+=unit.cost)
-        return cost
-    }
-
-    setPlayerReady = () => {
-        this.state.army = this.state.army.map((unit, i) => {
-            return {
-                ...unit,
-                x:i,
-                y:0, //TODO x/y should be set by player somehow
-                id: Date.now()+''+Math.random(),
-                ownerId: this.props.currentUser.id
-            }
-        })
-        onPlayerReady(this.props.currentUser, this.state.army, this.props.activeSession)
     }
 
     checkTimer = () => {

@@ -1,9 +1,10 @@
 import * as React from 'react'
 import { onMatchTick, onPlayerReady, onEndTurn } from '../uiManager/Thunks'
-import { Radio, RadioGroup } from '@blueprintjs/core'
+import { Radio, RadioGroup, Position } from '@blueprintjs/core'
 import AppStyles from '../../AppStyles';
 import { TopBar, Button } from '../Shared'
 import { MatchStatus, UnitType, Army, Units } from '../../../enum';
+import Maps from '../../assets/Maps'
 
 interface Props {
     me: Player
@@ -15,6 +16,7 @@ interface State {
     armyType: Army
     points: number
     showArmyPlacement: boolean
+    placingUnit: Unit | null
 }
 
 export default class ArmyBuilder extends React.Component<Props, State> {
@@ -23,7 +25,8 @@ export default class ArmyBuilder extends React.Component<Props, State> {
         army: Array<Unit>(),
         armyType: Army.LIVING,
         points: 30,
-        showArmyPlacement: false
+        showArmyPlacement: false,
+        placingUnit: null as null
     }
 
     setUnitTypeCount = (count:number, type:UnitType) => {
@@ -34,6 +37,28 @@ export default class ArmyBuilder extends React.Component<Props, State> {
         this.setState({army, points: 30 - this.getArmyValue(army)})
     }
 
+    setUnitCoords = (unit:Unit, x:number, y:number) => {
+        x+=this.props.me.spawn.x
+        y+= this.props.me.spawn.y
+        let army = this.state.army.map((aunit) => {
+            if(aunit.id === unit.id) return {...aunit, x, y}
+            return aunit
+        })
+        this.setState({army, placingUnit:null})
+    }
+
+    prepArmy = () => {
+        let army = this.state.army.map((unit, i) => {
+            return {
+                ...unit,
+                id: Date.now()+''+Math.random(),
+                ownerId: this.props.me.id,
+                description: unit.descriptions[Math.floor(Math.random() * Math.floor(unit.descriptions.length))]
+            }
+        })
+        return army
+    }
+
     getArmyValue = (army:Array<Unit>) => {
         let cost = 0
         army.forEach((unit) => cost+=unit.cost)
@@ -41,22 +66,13 @@ export default class ArmyBuilder extends React.Component<Props, State> {
     }
 
     setPlayerReady = () => {
-        this.state.army = this.state.army.map((unit, i) => {
-            return {
-                ...unit,
-                x:i,
-                y:0, //TODO x/y should be set by player somehow
-                id: Date.now()+''+Math.random(),
-                ownerId: this.props.me.id,
-                description: unit.descriptions[Math.floor(Math.random() * Math.floor(unit.descriptions.length))]
-            }
-        })
         onPlayerReady(this.props.me, this.state.army, this.props.activeSession)
     }
 
     render(){
         return (
-            <div style={{...styles.modal, display: this.props.activeSession.status === MatchStatus.SETUP ? 'flex':'none'}}>
+            <div 
+                 style={{...styles.modal, display: this.props.activeSession.status === MatchStatus.SETUP ? 'flex':'none'}}>
                 {TopBar('Army Builder')}
                 {this.props.me.isReady ? 
                     <div style={{padding:'1em', display:'flex', alignItems:'center', justifyContent:'center', height:'100%'}}>
@@ -64,7 +80,7 @@ export default class ArmyBuilder extends React.Component<Props, State> {
                             Waiting for players: {this.props.activeSession.players.filter((player) => !player.isReady).map((player) => player.name).join(', ')}
                         </h3>
                     </div> : 
-                    <div style={{padding:'1em', display:'flex', flexDirection:'column', height:'100%'}}>
+                    <div style={{padding:'1em', display:'flex', flexDirection:'column', height:'100%', justifyContent:'space-between'}}>
                         <RadioGroup
                             inline
                             label="Army"
@@ -76,8 +92,30 @@ export default class ArmyBuilder extends React.Component<Props, State> {
                         </RadioGroup>
                         <h4 style={{margin:0}}>Available Points: {this.state.points}</h4>
                         {this.state.showArmyPlacement ? 
-                        <div>
-                            //TODO render a tiny grid here
+                        <div style={{position:'relative'}}>
+                            <div style={{display:'flex', fontFamily:'Rune'}}>
+                                {this.state.army.filter((unit) => !unit.x && !unit.y).map((unit) => 
+                                    <div onClick={()=>this.setState({placingUnit:unit})} style={{textAlign:'right', padding: '0.25em'}}>
+                                        <span style={{color: (this.state.placingUnit && (this.state.placingUnit as any).id === unit.id) ? AppStyles.colors.grey2 : 'black'}}>
+                                            {unit.rune}</span>
+                                    </div>
+                                )}
+                            </div>
+                            <div style={{display:'flex', fontFamily:'Rune'}}>
+                                {Maps.StagingArea.map((row, x) => 
+                                    <div>
+                                        {row.map((col, y) => 
+                                            <div style={styles.tile} 
+                                                onClick={()=>this.setUnitCoords(this.state.placingUnit, x, y)}>
+                                                {this.state.army.filter(unit=>unit.x === x && unit.y===y).map(unit=>
+                                                    <span> 
+                                                        {unit.rune}
+                                                    </span>)}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                         : 
                         <div style={styles.scrollContainer}>
@@ -95,8 +133,8 @@ export default class ArmyBuilder extends React.Component<Props, State> {
                                 </div>
                             )}
                         </div> }
-                        
-                        {Button(this.state.army.length > 0, ()=>this.setPlayerReady(), 'Done')}
+                        {this.state.showArmyPlacement && Button(this.state.army.filter((unit) => !unit.x).length===0, ()=>this.setPlayerReady(), 'Done')}
+                        {!this.state.showArmyPlacement && Button(this.state.army.length > 0, ()=>this.setState({showArmyPlacement:true, army: this.prepArmy()}), 'Place')}
                     </div>
                 }
             </div>)
@@ -179,5 +217,13 @@ const styles = {
         alignItems: 'center',
         width: '33%',
         justifyContent: 'space-between'
-    }
+    },
+    tile: {
+        width: '2em',
+        height:'2em',
+        border: '1px dashed',
+        position:'relative' as 'relative',
+        backgroundImage: 'url(./build'+require('../../assets/whiteTile.png')+')',
+        backgroundRepeat: 'repeat'
+    },
 }
