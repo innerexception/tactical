@@ -3,44 +3,28 @@ import { onMatchTick, onPlayerReady, onEndTurn } from '../uiManager/Thunks'
 import { Radio, RadioGroup } from '@blueprintjs/core'
 import { Button } from '../Login'
 import AppStyles from '../../AppStyles';
-import Map from './Map'
+import { TopBar } from './Match'
 import { MatchStatus, UnitType, Army, Units } from '../../../enum';
-import ArmyBuilder from './ArmyBuilder';
 
 interface Props {
-    currentUser: LocalUser
+    me: Player
     activeSession: Session
 }
 
 interface State {
-    isActive: boolean
-    interval: NodeJS.Timeout | number
-    showMatchOptions: boolean
     army: Array<Unit>
     armyType: Army
     points: number
-    me: Player
+    showArmyPlacement: boolean
 }
 
-export default class Match extends React.Component<Props, State> {
+export default class ArmyBuilder extends React.Component<Props, State> {
 
     state = {
-        interval: 0,
-        isActive: this.props.activeSession.activePlayerId === this.props.currentUser.id,
-        me: this.props.activeSession.players.find(player=>player.id===this.props.currentUser.id),
-        showMatchOptions: false,
         army: Array<Unit>(),
         armyType: Army.LIVING,
-        points: 30
-    }
-
-    componentDidMount = () => {
-        this.setState({interval: this.state.isActive ? setInterval(()=>this.checkTimer(), 1000) : 0})
-    }
-
-    endTurn = () => {
-        clearInterval(this.state.interval)
-        onEndTurn(this.props.activeSession)
+        points: 30,
+        showArmyPlacement: false
     }
 
     setUnitTypeCount = (count:number, type:UnitType) => {
@@ -64,49 +48,62 @@ export default class Match extends React.Component<Props, State> {
                 x:i,
                 y:0, //TODO x/y should be set by player somehow
                 id: Date.now()+''+Math.random(),
-                ownerId: this.props.currentUser.id
+                ownerId: this.props.me.id
             }
         })
-        onPlayerReady(this.props.currentUser, this.state.army, this.props.activeSession)
-    }
-
-    checkTimer = () => {
-        if(this.props.activeSession.ticks >= this.props.activeSession.turnTickLimit){
-            this.endTurn()
-        }
-        else onMatchTick(this.props.activeSession)
+        onPlayerReady(this.props.me, this.state.army, this.props.activeSession)
     }
 
     render(){
-
-        const activePlayer = this.props.activeSession.players.find((player) => player.id === this.props.activeSession.activePlayerId)
-        const me = this.props.activeSession.players.find((player) => this.props.currentUser.id === player.id)
-
         return (
-            <div style={AppStyles.window}>
-                <Map map={this.props.activeSession.map} 
-                     activePlayer={me}
-                     activeSession={this.props.activeSession}
-                     players={this.props.activeSession.players}/>
-                <div style={{...styles.modal, display: this.state.showMatchOptions ? 'flex':'none'}}>
-                    <div style={{display:'flex'}}>
-                        options menu
+            <div style={{...styles.modal, display: this.props.activeSession.status === MatchStatus.SETUP ? 'flex':'none'}}>
+                {TopBar('Army Builder')}
+                {this.props.me.isReady ? 
+                    <div style={{padding:'1em', display:'flex', alignItems:'center', justifyContent:'center', height:'100%'}}>
+                        <h3 style={{textAlign:'center', background:'white', padding:'1em', borderRadius:'5px'}}>
+                            Waiting for players: {this.props.activeSession.players.filter((player) => !player.isReady).map((player) => player.name).join(', ')}
+                        </h3>
+                    </div> : 
+                    <div style={{padding:'1em', display:'flex', flexDirection:'column', height:'100%'}}>
+                        <RadioGroup
+                            inline
+                            label="Army"
+                            onChange={(e)=>this.setState({armyType: e.currentTarget.value as Army, points: 30, army: []})}
+                            selectedValue={this.state.armyType}
+                        >
+                            <Radio label="Living" value={Army.LIVING} />
+                            <Radio label="Dead" value={Army.DEAD} />
+                        </RadioGroup>
+                        <h4 style={{margin:0}}>Available Points: {this.state.points}</h4>
+                        {this.state.showArmyPlacement ? 
+                        <div>
+                            //TODO render a tiny grid here
+                        </div>
+                        : 
+                        <div style={styles.scrollContainer}>
+                            {Units[this.state.armyType].map((unit) => 
+                                <div style={{display:'flex', justifyContent:'space-between'}}>
+                                    <div style={styles.unitRow}>
+                                        <div style={{fontFamily:'Rune', fontSize:'1em', width: '2em'}}>{unit.rune}</div>
+                                        <div>{unit.name}</div>
+                                    </div>
+                                    <div style={{display:'flex'}}>
+                                        <div style={styles.circleButton} onClick={()=>this.setUnitTypeCount(getUnitCount(this.state.army, unit.type)+1, unit.type)}>+</div>
+                                        <div style={styles.circleButton}>{getUnitCount(this.state.army, unit.type)}</div>
+                                        <div style={styles.circleButton} onClick={()=>this.setUnitTypeCount(getUnitCount(this.state.army, unit.type)-1, unit.type)}>-</div>
+                                    </div>
+                                </div>
+                            )}
+                        </div> }
+                        
+                        {Button(this.state.army.length > 0, ()=>this.setPlayerReady(), 'Done')}
                     </div>
-                </div>
-                <ArmyBuilder activeSession={this.props.activeSession} me={me}/>
-         </div>
-        )
+                }
+            </div>)
     }
 }
 
 const getUnitCount = (army:Array<Unit>, unitType:UnitType) => army.filter((aunit)=>aunit.type === unitType).length
-
-export const TopBar = (text:string) => 
-    <div style={styles.topBar}>
-        <div style={{width:'33%'}}><hr style={styles.hr}/><hr style={styles.hr}/><hr style={styles.hr}/><hr style={styles.hr}/></div>
-            {text}
-        <div style={{width:'33%'}}><hr style={styles.hr}/><hr style={styles.hr}/><hr style={styles.hr}/><hr style={styles.hr}/></div>
-    </div>
 
 const styles = {
     frame: {
