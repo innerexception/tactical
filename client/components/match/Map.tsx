@@ -57,7 +57,7 @@ export default class Map extends React.Component<Props, State> {
     }
 
     getObstruction = (x:number, y:number) => {
-        let tile = this.props.map[y][x]
+        let tile = this.props.map[x][y]
         if(tile){
             if(tile.unit) return true
             if(tile.type === TileType.MOUNTAIN || tile.type===TileType.RIVER) return true    
@@ -150,14 +150,14 @@ export default class Map extends React.Component<Props, State> {
             <div>
                 {getUnitInfoOfTile(this.state.selectedTile, this.props.activePlayer, this.getUnitActionButtons)}
                 <div style={styles.mapFrame}>
-                    <div>
-                        {this.props.map.map((row, y) => 
-                            <div style={{display:'flex'}}>
-                                {row.map((tile:Tile, x) => 
+                    <div style={{display:'flex'}}>
+                        {this.props.map.map((row, x) => 
+                            <div>
+                                {row.map((tile:Tile, y) => 
                                     <div style={{
                                             ...styles.tile, 
-                                            background: this.state.highlightTiles[y] && this.state.highlightTiles[y][x]===true ? AppStyles.colors.grey2 : 'transparent',
-                                            borderStyle: isSelectedTile(tile, this.state.selectedTile) ? 'dashed' : 'none'
+                                            background: this.state.highlightTiles[x] && this.state.highlightTiles[x][y]===true ? AppStyles.colors.grey2 : 'transparent',
+                                            borderStyle: isSelectedTile(tile, this.state.selectedTile) ? 'dashed' : 'dotted'
                                         }} 
                                         onClick={this.getTileClickHandler(tile)}>
                                         <div style={{fontFamily:'Terrain', color: AppStyles.colors.grey3, fontSize:'2em'}}>{tile.subType}</div>
@@ -232,7 +232,7 @@ const getTilesInRange = (unit:Unit, map:Array<Array<Tile>>) => {
             candidateX += direction.x
             candidateY += direction.y
             if(candidateY >= 0 && candidateX >= 0)
-                tiles[candidateY][candidateX] = true
+                tiles[candidateX][candidateY] = true
         }
     })
     return tiles

@@ -18,7 +18,7 @@ export const onPlayerReady = (currentUser:LocalUser, army:Array<Unit>, session:S
         } 
     })
     army.forEach(unit => {
-        session.map[unit.y][unit.x].unit = unit
+        session.map[unit.x][unit.y].unit = unit
     })
     if(!session.players.find((player)=>!player.isReady)){
         session.status = MatchStatus.ACTIVE
@@ -40,7 +40,7 @@ export const onMatchStart = (currentUser:LocalUser, session:Session) => {
                     spawn: Maps.CrowBridge.SpawnPoints[i]
                 }
             }),
-            map: Maps.CrowBridge.Map,
+            map: Maps.CrowBridge.Map.map((row, i) => row.map((tile:Tile, j) => {return {...tile, x:i, y:j}})),
             ticks: 0,
             turnTickLimit: 100000
         }
@@ -52,7 +52,7 @@ export const onMoveUnit = (unit:Unit, session:Session) => {
     session.map.forEach(row => row.forEach(tile => {
         if(tile.unit && tile.unit.id === unit.id) delete tile.unit
     }))
-    session.map[unit.y][unit.x].unit = unit
+    session.map[unit.x][unit.y].unit = unit
     sendSessionUpdate(session)
 }
 
@@ -62,10 +62,10 @@ export const onAttackTile = (attacker:Unit, tile:Tile, session:Session) => {
     attacker.move = 0
     attacker.attacks--
 
-    session.map[attacker.y][attacker.x].unit = {...attacker}
+    session.map[attacker.x][attacker.y].unit = {...attacker}
     if(target.hp > 0)
-        session.map[target.y][target.x].unit = {...target}
-    else delete session.map[target.y][target.x].unit
+        session.map[target.x][target.y].unit = {...target}
+    else delete session.map[target.x][target.y].unit
 
     sendSessionUpdate(session)
 }
