@@ -10,7 +10,7 @@ declare enum UnitType {
 }
 declare enum Directions {LEFT='LEFT', RIGHT='RIGHT', UP='UP', DOWN='DOWN'}
 declare enum Abilities {CHARGE='CHARGE'}
-declare enum Traits {BLOCK='BLOCK', FLOAT='FLOAT', WATERBREATH='WATERBREATH'}
+declare enum Traits {BLOCK='BLOCK', FLOAT='FLOAT', WATERBREATH='WATERBREATH', BRITTLE='BRITTLE', FIRESHOCK='FIRESHOCK'}
 
 declare enum MatchStatus {ACTIVE='ACTIVE',WIN='WIN',LOSE='LOSE', SETUP='SETUP'}
 

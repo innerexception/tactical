@@ -1,8 +1,10 @@
 import { dispatch } from '../../../client/App'
-import { ReducerActions, MatchStatus } from '../../../enum'
+import { ReducerActions, MatchStatus, Traits, FourCoordinatesArray } from '../../../enum'
 import WS from '../../WebsocketClient'
 export const server = new WS()
 import CrowsBridge from '../../assets/CrowsBridge'
+import { toast } from './toast';
+import { getRandomInt } from '../Util';
 
 export const onLogin = (currentUser:LocalUser, sessionId:string) => {
     dispatch({ type: ReducerActions.SET_USER, currentUser })
@@ -57,17 +59,31 @@ export const onMoveUnit = (unit:Unit, session:Session) => {
 
 export const onAttackTile = (attacker:Unit, tile:Tile, session:Session) => {
     const target = tile.unit
-    target.hp -= attacker.atk
-    attacker.move = 0
-    attacker.attacks--
+    if(target.trait === Traits.BLOCK){
+        let chance = getRandomInt(5)===1
+        if(chance){
+            toast.show({message:'The attack was skillfully blocked.'})
+        }
+        else {
+            target.hp -= attacker.atk
+        }
+    }
 
-    //TODO, implement Brittle trait
-    //TODO, implement Fireshock trait
+    attacker.move = 0
+    attacker.attacks--     
 
     session.map[attacker.x][attacker.y].unit = {...attacker}
-    if(target.hp > 0)
+    if(target.hp > 0 && target.trait !== Traits.BRITTLE)
         session.map[target.x][target.y].unit = {...target}
-    else delete session.map[target.x][target.y].unit
+    else if((target.hp < 3 && target.trait === Traits.BRITTLE)){
+        toast.show({message: 'The Gargantuan collapses in a cloud of dust.'})
+        delete session.map[target.x][target.y].unit
+    }
+    else{
+        toast.show({message: 'Casualty.'})
+        delete session.map[target.x][target.y].unit
+    }
+
 
     let targetUnits = []
     session.map.forEach(row=>row.forEach(tile=>{

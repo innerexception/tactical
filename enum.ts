@@ -37,6 +37,15 @@ export enum Army {
 }
 export enum MatchStatus {ACTIVE='ACTIVE',WIN='WIN',LOSE='LOSE', SETUP='SETUP'}
 export enum Directions {LEFT='LEFT', RIGHT='RIGHT', UP='UP', DOWN='DOWN'}
+export const FourCoordinates = {
+    RIGHT:{x:1,y:0},
+    LEFT: {x:-1,y:0},
+    DOWN: {x:0,y:1},
+    UP: {x:0,y:-1}
+}
+export const FourCoordinatesArray = [{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}]
+export const EightCoordinatesArray = [{x:1,y:0},{x:1,y:1},{x:-1,y:0},{x:-1,y:-1},{x:0,y:1},{x:-1, y:1},{x:0,y:-1},{x:-1,y:0}]
+    
 export enum TileType {
     MOUNTAIN='MOUNTAIN',
     FOREST='FOREST',

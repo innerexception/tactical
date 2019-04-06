@@ -1,8 +1,10 @@
 import * as React from 'react'
 import { onMoveUnit, onAttackTile, onEndTurn, onUpdateUnit } from '../uiManager/Thunks'
 import AppStyles from '../../AppStyles';
-import { Directions, TileType, MatchStatus, Abilities } from '../../../enum'
+import { FourCoordinatesArray, EightCoordinatesArray, TileType, MatchStatus, Abilities, Traits, Directions } from '../../../enum'
 import { Button, LightButton } from '../Shared'
+import { toast } from '../uiManager/toast';
+import { getRandomInt } from '../Util';
 
 interface Props {
     activeSession: Session
@@ -111,7 +113,7 @@ export default class Map extends React.Component<Props, State> {
                 case Directions.RIGHT: candidateTile.x++
                      break
             }
-            if(!this.getObstruction(candidateTile.x, candidateTile.y)){
+            if(!this.getObstruction(candidateTile.x, candidateTile.y, unit)){
                 unit.x = candidateTile.x
                 unit.y = candidateTile.y
                 unit.move--
@@ -122,11 +124,15 @@ export default class Map extends React.Component<Props, State> {
         }
     }
 
-    getObstruction = (x:number, y:number) => {
+    getObstruction = (x:number, y:number, unit:Unit) => {
         let tile = this.props.map[x][y]
         if(tile){
             if(tile.unit) return true
-            if(tile.type === TileType.MOUNTAIN || tile.type===TileType.RIVER) return true    //TODO implement terrain traits
+            if(tile.type === TileType.MOUNTAIN || tile.type===TileType.RIVER){
+                if(unit.trait === Traits.FLOAT) return false
+                if(unit.trait === Traits.WATERBREATH && tile.type === TileType.RIVER) return false
+                return true 
+            } 
             return false
         }
         return true
@@ -162,6 +168,18 @@ export default class Map extends React.Component<Props, State> {
         if(tile.unit){
             //TODO flash/shake tile's unit here
             onAttackTile(this.state.attackingUnit, tile, this.props.activeSession)
+            if(tile.unit.trait === Traits.FIRESHOCK){
+                let direction = getRandomInt(3)
+                const directionTuple = FourCoordinatesArray[direction]
+                let extraTile = this.props.activeSession.map[directionTuple.x][directionTuple.y]
+                if(extraTile && extraTile.unit){
+                    let chance = getRandomInt(3)===1
+                    if(chance){
+                        toast.show({message: 'Alchemist fire has damaged an adjacent unit.'})
+                        onAttackTile(this.state.attackingUnit, extraTile, this.props.activeSession)
+                    }
+                }
+            }
         }
         this.hideAttackTiles()
     }
@@ -285,10 +303,9 @@ const getTileOpacity = (tile:Tile, me:Player, visibleTiles: Array<Array<boolean>
 }
 
 const getTilesInRange = (unit:Unit, map:Array<Array<Tile>>) => {
-    let directions = [{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}]
     let tiles = new Array(map.length).fill(null).map((item) => 
                     new Array(map[0].length).fill(false))
-    directions.forEach((direction) => {
+    FourCoordinatesArray.forEach((direction) => {
         let candidateX = unit.x
         let candidateY = unit.y
         for(var i=unit.range; i>0; i--){
@@ -320,11 +337,10 @@ const getVisibleTilesOfPlayer = (player:Player, map:Array<Array<Tile>>) => {
 }
 
 const getVisibleTilesOfUnits = (units:Array<Unit>, map:Array<Array<Tile>>) => {
-    let directions = [{x:1,y:0},{x:1,y:1},{x:-1,y:0},{x:-1,y:-1},{x:0,y:1},{x:-1, y:1},{x:0,y:-1},{x:-1,y:0}]
     let tiles = new Array(map.length).fill(null).map((item) => 
                     new Array(map[0].length).fill(false))
     units.forEach(unit => {
-        directions.forEach((direction) => {
+        EightCoordinatesArray.forEach((direction) => {
             let candidateX = unit.x
             let candidateY = unit.y
             for(var i=unit.sight; i>0; i--){
