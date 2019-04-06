@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { onMoveUnit, onAttackTile, onEndTurn, onUpdateUnit } from '../uiManager/Thunks'
 import AppStyles from '../../AppStyles';
-import { Directions, TileType, MatchStatus, Abilities } from '../../../enum'
+import { Directions, TileType, MatchStatus, Abilities, Units } from '../../../enum'
 import { Button, LightButton } from '../Shared'
 
 interface Props {
@@ -17,6 +17,7 @@ interface State {
     movingUnit: Unit | null
     attackingUnit: Unit | null
     highlightTiles: Array<Array<boolean>>
+    visibleTiles: Array<Array<boolean>>
     startX: number
     startY: number
 }
@@ -28,6 +29,7 @@ export default class Map extends React.Component<Props, State> {
         movingUnit: null as null,
         attackingUnit: null as null,
         highlightTiles: [[false]],
+        visibleTiles: getVisibleTilesOfPlayer(this.props.me, this.props.map),
         startX: -1,
         startY: -1
     }
@@ -73,7 +75,7 @@ export default class Map extends React.Component<Props, State> {
                 unit.y = candidateTile.y
                 unit.move--
                 candidateTile.unit = unit
-                this.setState({selectedTile: candidateTile}, 
+                this.setState({selectedTile: candidateTile, visibleTiles: getVisibleTilesOfPlayer(this.props.me, this.props.map)}, 
                     ()=>onMoveUnit(unit, this.props.activeSession))
             }
         }
@@ -184,13 +186,14 @@ export default class Map extends React.Component<Props, State> {
                                 {row.map((tile:Tile, y) => 
                                     <div style={{
                                             ...styles.tile, 
+                                            opacity: getTileOpacity(tile, this.props.me, this.state.visibleTiles),
                                             background: this.state.highlightTiles[x] && this.state.highlightTiles[x][y]===true ? AppStyles.colors.grey2 : 'transparent',
                                             borderStyle: isSelectedTile(tile, this.state.selectedTile) ? 'dashed' : 'dotted'
                                         }} 
                                         onClick={this.getTileClickHandler(tile)}>
                                         <div style={{fontFamily:'Terrain', color: AppStyles.colors.grey3, fontSize:'2em'}}>{tile.subType}</div>
                                         {this.state.movingUnit && this.getMoveArrowsOfTile(tile, this.state.movingUnit)}
-                                        {getUnitPortraitOfTile(tile, this.props.me)}
+                                        {getUnitPortraitOfTile(tile)}
                                     </div>
                                 )}
                             </div>
@@ -215,10 +218,10 @@ const hasNoMoves = (player:Player, map:Array<Array<Tile>>) => {
     return playerUnits.length === 0
 }
 
-const getUnitPortraitOfTile = (tile:Tile, me:Player) => {
+const getUnitPortraitOfTile = (tile:Tile) => {
     let tileUnit = tile.unit
     if(tileUnit){
-        return <div style={{opacity: getUnitOpacity(tileUnit, me), textAlign:'right', position:'absolute', top:0, right:0}}>
+        return <div style={{textAlign:'right', position:'absolute', top:0, right:0}}>
                     <span style={{fontFamily:'Rune'}}>{tileUnit.rune}</span>
                     <div>{new Array(tileUnit.hp).fill(null).map((hp) =>  <span>*</span>)}</div>
                </div>
@@ -251,13 +254,16 @@ const getUnitInfoOfTile = (tile:Tile, me:Player, getUnitActionButtons:Function) 
     return <div style={styles.tileInfo}>No selection...</div>
 }
 
-const getUnitOpacity = (unit:Unit, me:Player) => {
-    let isOwner = unit.ownerId === me.id
-    if(isOwner) return 1
-    else {
-        //TODO determine closest owned unit to this unowned unit
-        return 0.5
+const getTileOpacity = (tile:Tile, me:Player, visibleTiles: Array<Array<boolean>>) => {
+    if(tile.unit){
+        let isOwner = tile.unit.ownerId === me.id
+        if(isOwner) return 1
+        else {
+            return visibleTiles[tile.unit.x][tile.unit.y] ? 0.5 : 0
+        }
     }
+    //TODO need tile x/y here
+    return visibleTiles[tile.x][tile.y] ? 1 : 0.5
 }
 
 const getTilesInRange = (unit:Unit, map:Array<Array<Tile>>) => {
@@ -284,6 +290,36 @@ const isSelectedTile = (tile:Tile, selectedTile?:Tile) => {
         return tile.x === selectedTile.x && tile.y === selectedTile.y
     }
     return false
+}
+
+const getVisibleTilesOfPlayer = (player:Player, map:Array<Array<Tile>>) => {
+    let units= new Array<Unit>()
+    map.forEach(row => row.forEach((tile:Tile) => {
+        if(tile.unit && tile.unit.ownerId === player.id)
+            units.push(tile.unit)
+    }))
+    return getVisibleTilesOfUnits(units, map)
+}
+
+const getVisibleTilesOfUnits = (units:Array<Unit>, map:Array<Array<Tile>>) => {
+    let directions = [{x:1,y:0},{x:1,y:1},{x:-1,y:0},{x:-1,y:-1},{x:0,y:1},{x:-1, y:1},{x:0,y:-1},{x:-1,y:0}]
+    let tiles = new Array(map.length).fill(null).map((item) => 
+                    new Array(map[0].length).fill(false))
+    units.forEach(unit => {
+        directions.forEach((direction) => {
+            let candidateX = unit.x
+            let candidateY = unit.y
+            for(var i=unit.sight; i>0; i--){
+                candidateX += direction.x
+                candidateY += direction.y
+                if(candidateY >= 0 && candidateX >= 0 
+                    && candidateX < map.length 
+                    && candidateY < map[0].length)
+                    tiles[candidateX][candidateY] = true
+            }
+        })
+    })
+    return tiles
 }
 
 const styles = {
