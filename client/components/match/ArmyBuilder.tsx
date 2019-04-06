@@ -35,7 +35,7 @@ export default class ArmyBuilder extends React.Component<Props, State> {
             army = army.concat(new Array(count).fill(
                 {...Units[this.state.armyType].find((unit) => unit.type === type)}
             ))
-            this.setState({army, points: 30 - this.getArmyValue(army)})
+            this.setState({army, points: Math.max(0,30 - this.getArmyValue(army))})
         }
     }
 

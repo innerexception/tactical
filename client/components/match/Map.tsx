@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { onMoveUnit, onAttackTile, onEndTurn, onUpdateUnit } from '../uiManager/Thunks'
 import AppStyles from '../../AppStyles';
-import { Directions, TileType, MatchStatus, Abilities, Units } from '../../../enum'
+import { Directions, TileType, MatchStatus, Abilities } from '../../../enum'
 import { Button, LightButton } from '../Shared'
 
 interface Props {
@@ -16,6 +16,7 @@ interface State {
     selectedTile: Tile | null
     movingUnit: Unit | null
     attackingUnit: Unit | null
+    showDescription: Unit | null
     highlightTiles: Array<Array<boolean>>
     visibleTiles: Array<Array<boolean>>
     startX: number
@@ -28,6 +29,7 @@ export default class Map extends React.Component<Props, State> {
         selectedTile: null as null,
         movingUnit: null as null,
         attackingUnit: null as null,
+        showDescription: null as null,
         highlightTiles: [[false]],
         visibleTiles: getVisibleTilesOfPlayer(this.props.me, this.props.map),
         startX: -1,
@@ -49,13 +51,49 @@ export default class Map extends React.Component<Props, State> {
                     </div>
         else if(!this.props.isActive)
             return (
-                <div style={{...styles.disabled, display: this.props.isActive ? 'none':'flex'}}>
+                <div style={{...styles.disabled, display: 'flex'}}>
                     <div style={AppStyles.notification}>
                         Waiting for {activeName}...
                     </div>
                 </div>
             )
+        else if(this.state.showDescription)
+            return (
+                <div style={{...styles.disabled, display: 'flex'}}>
+                    <div style={AppStyles.notification}>
+                        <div style={{marginBottom:'0.5em'}}>{(this.state.showDescription as Unit).description}</div>
+                        {Button(true, ()=>this.setState({showDescription:null}), 'Done')}
+                    </div>
+                </div>
+            )
     }
+
+    getUnitInfoOfTile = () => {
+        let tile = this.state.selectedTile
+        if(tile){
+            let unit = (tile as any).unit
+            if(unit){
+                let isOwner = unit.ownerId === this.props.me.id
+                return <div style={styles.tileInfo}>
+                            <div>
+                                <h4 style={{margin:0}}>{(tile as any).type}</h4>
+                                <h4 style={{margin:0}}>{unit.type}</h4>
+                                {LightButton(true, ()=>this.setState({showDescription: unit}), 'Info')}
+                            </div>
+                            <div>
+                                {isOwner && <h4 style={{margin:0}}>M: {unit.move} / {unit.maxMove}</h4>}
+                                {this.getUnitActionButtons(this.props.me, unit)}
+                            </div>
+                        </div>
+            }
+            else
+                return <div style={styles.tileInfo}>
+                            <h4>{(tile as any).type}</h4>
+                        </div>
+        }
+        return <div style={styles.tileInfo}>No selection...</div>
+    }
+    
 
     moveUnit = (unit:Unit, direction:Directions) => {
         let candidateTile = {...this.state.selectedTile as Tile}
@@ -178,26 +216,28 @@ export default class Map extends React.Component<Props, State> {
     render(){
         return (
             <div>
-                {getUnitInfoOfTile(this.state.selectedTile, this.props.me, this.getUnitActionButtons)}
-                <div style={styles.mapFrame}>
-                    <div style={{display:'flex'}}>
-                        {this.props.map.map((row, x) => 
-                            <div>
-                                {row.map((tile:Tile, y) => 
-                                    <div style={{
-                                            ...styles.tile, 
-                                            opacity: getTileOpacity(tile, this.props.me, this.state.visibleTiles),
-                                            background: this.state.highlightTiles[x] && this.state.highlightTiles[x][y]===true ? AppStyles.colors.grey2 : 'transparent',
-                                            borderStyle: isSelectedTile(tile, this.state.selectedTile) ? 'dashed' : 'dotted'
-                                        }} 
-                                        onClick={this.getTileClickHandler(tile)}>
-                                        <div style={{fontFamily:'Terrain', color: AppStyles.colors.grey3, fontSize:'2em'}}>{tile.subType}</div>
-                                        {this.state.movingUnit && this.getMoveArrowsOfTile(tile, this.state.movingUnit)}
-                                        {getUnitPortraitOfTile(tile)}
-                                    </div>
-                                )}
-                            </div>
-                        )}
+                {this.getUnitInfoOfTile()}
+                <div style={{position:'relative'}}>
+                    <div style={styles.mapFrame}>
+                        <div style={{display:'flex'}}>
+                            {this.props.map.map((row, x) => 
+                                <div>
+                                    {row.map((tile:Tile, y) => 
+                                        <div style={{
+                                                ...styles.tile, 
+                                                opacity: getTileOpacity(tile, this.props.me, this.state.visibleTiles),
+                                                background: this.state.highlightTiles[x] && this.state.highlightTiles[x][y]===true ? AppStyles.colors.grey2 : 'transparent',
+                                                borderStyle: isSelectedTile(tile, this.state.selectedTile) ? 'dashed' : 'dotted'
+                                            }} 
+                                            onClick={this.getTileClickHandler(tile)}>
+                                            <div style={{fontFamily:'Terrain', color: AppStyles.colors.grey3, fontSize:'2em'}}>{tile.subType}</div>
+                                            {this.state.movingUnit && this.getMoveArrowsOfTile(tile, this.state.movingUnit)}
+                                            {getUnitPortraitOfTile(tile)}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
                     </div>
                     {this.getNotification()}
                 </div>
@@ -229,31 +269,6 @@ const getUnitPortraitOfTile = (tile:Tile) => {
     return <span/>
 }
 
-const getUnitInfoOfTile = (tile:Tile, me:Player, getUnitActionButtons:Function) => {
-    if(tile){
-        let unit = tile.unit
-        if(unit){
-            let isOwner = unit.ownerId === me.id
-            return <div style={styles.tileInfo}>
-                        <div>
-                            <h4 style={{margin:0}}>{tile.type}</h4>
-                            <h4 style={{margin:0}}>{unit.type}</h4>
-                            <h4 style={{margin:0}}>{unit.description}</h4>
-                        </div>
-                        <div>
-                            {isOwner && <h4 style={{margin:0}}>M: {unit.move} / {unit.maxMove}</h4>}
-                            {getUnitActionButtons(me, unit)}
-                        </div>
-                    </div>
-        }
-        else
-            return <div style={styles.tileInfo}>
-                        <h4>{tile.type}</h4>
-                    </div>
-    }
-    return <div style={styles.tileInfo}>No selection...</div>
-}
-
 const getTileOpacity = (tile:Tile, me:Player, visibleTiles: Array<Array<boolean>>) => {
     if(tile.unit){
         let isOwner = tile.unit.ownerId === me.id
@@ -262,7 +277,7 @@ const getTileOpacity = (tile:Tile, me:Player, visibleTiles: Array<Array<boolean>
             return visibleTiles[tile.unit.x][tile.unit.y] ? 0.5 : 0
         }
     }
-    //TODO need tile x/y here
+    
     return visibleTiles[tile.x][tile.y] ? 1 : 0.5
 }
 
