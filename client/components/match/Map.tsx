@@ -61,7 +61,10 @@ export default class Map extends React.Component<Props, State> {
             return (
                 <div style={{...styles.disabled, display: 'flex'}}>
                     <div style={AppStyles.notification}>
-                        <div style={{marginBottom:'0.5em'}}>{(this.state.showDescription as Unit).description}</div>
+                        <div style={{marginBottom:'0.5em'}}>
+                            <span style={{fontFamily:'Rune', marginRight:'1em'}}>{(this.state.showDescription as Unit).rune}</span>
+                            {(this.state.showDescription as Unit).description}
+                        </div>
                         {Button(true, ()=>this.setState({showDescription:null}), 'Done')}
                     </div>
                 </div>
