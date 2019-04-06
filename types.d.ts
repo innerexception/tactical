@@ -43,6 +43,7 @@ interface Unit {
     descriptions: Array<string>
     description: string
     ability: Abilities
+    abilityCooldown: number
     trait: Traits
     cost: number
     level: number

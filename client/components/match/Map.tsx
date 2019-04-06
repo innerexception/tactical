@@ -1,9 +1,8 @@
 import * as React from 'react'
-import { onMoveUnit, onAttackTile, onEndTurn } from '../uiManager/Thunks'
+import { onMoveUnit, onAttackTile, onEndTurn, onUpdateUnit } from '../uiManager/Thunks'
 import AppStyles from '../../AppStyles';
-import { Directions, TileType, MatchStatus } from '../../../enum'
+import { Directions, TileType, MatchStatus, Abilities } from '../../../enum'
 import { Button, LightButton } from '../Shared'
-import Match from './Match';
 
 interface Props {
     activeSession: Session
@@ -84,7 +83,7 @@ export default class Map extends React.Component<Props, State> {
         let tile = this.props.map[x][y]
         if(tile){
             if(tile.unit) return true
-            if(tile.type === TileType.MOUNTAIN || tile.type===TileType.RIVER) return true    
+            if(tile.type === TileType.MOUNTAIN || tile.type===TileType.RIVER) return true    //TODO implement terrain traits
             return false
         }
         return true
@@ -99,7 +98,12 @@ export default class Map extends React.Component<Props, State> {
     }
 
     performSpecial = (unit:Unit) => {
-
+        switch(unit.ability){
+            case Abilities.CHARGE:
+                unit.move = unit.maxMove+1
+                unit.abilityCooldown=2
+        }
+        onUpdateUnit(unit, this.props.activeSession)
     }
 
     showAttackTiles = (unit:Unit) => {
@@ -139,9 +143,9 @@ export default class Map extends React.Component<Props, State> {
                     }
                 }
                 if(!this.state.movingUnit && !this.state.attackingUnit){
-                    if(unit.move===unit.maxMove) buttons.push(LightButton(true, ()=>this.setState({movingUnit: unit, startX: unit.x, startY: unit.y, attackingUnit:null, highlightTiles:[[false]]}), 'Move'))
+                    if(unit.move>=unit.maxMove) buttons.push(LightButton(true, ()=>this.setState({movingUnit: unit, startX: unit.x, startY: unit.y, attackingUnit:null, highlightTiles:[[false]]}), 'Move'))
                 }
-                if(unit.ability) buttons.push(LightButton(true, ()=>this.performSpecial(unit), unit.ability))
+                if(unit.ability) buttons.push(LightButton(unit.abilityCooldown === 0, ()=>this.performSpecial(unit), unit.ability))
 
                 return <div>
                             {buttons}

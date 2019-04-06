@@ -62,6 +62,9 @@ export const onAttackTile = (attacker:Unit, tile:Tile, session:Session) => {
     attacker.move = 0
     attacker.attacks--
 
+    //TODO, implement Brittle trait
+    //TODO, implement Fireshock trait
+
     session.map[attacker.x][attacker.y].unit = {...attacker}
     if(target.hp > 0)
         session.map[target.x][target.y].unit = {...target}
@@ -90,7 +93,15 @@ export const onEndTurn = (session:Session) => {
         if(tile.unit && tile.unit.ownerId === session.activePlayerId) {
             tile.unit.move = tile.unit.maxMove
             tile.unit.attacks = tile.unit.maxAttacks
+            if(tile.unit.abilityCooldown > 0) tile.unit.abilityCooldown--
         }
+    }))
+    sendSessionUpdate(session)
+}
+
+export const onUpdateUnit = (unit:Unit, session:Session) => {
+    session.map.forEach(row=>row.forEach(tile=>{
+        if(tile.unit && tile.unit.id === unit.id) tile.unit = {...unit}
     }))
     sendSessionUpdate(session)
 }
