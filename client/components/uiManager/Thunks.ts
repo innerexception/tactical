@@ -1,6 +1,5 @@
 import { dispatch } from '../../../client/App'
 const Constants = require('../../../Constants')
-import { toast } from './toast'
 import WS from '../../WebsocketClient'
 export const server = new WS()
 import { MatchStatus } from '../../../enum'
@@ -18,8 +17,8 @@ export const onPlayerReady = (currentUser:Player, army:Array<Unit>, session:Sess
         } 
     })
     army.forEach(unit => {
-        unit.x+=currentUser.spawn.x
-        unit.y+= currentUser.spawn.y
+        unit.x=(unit.x+currentUser.spawn.x)%session.map.length
+        unit.y=(unit.y+currentUser.spawn.y)%session.map[0].length
         session.map[unit.x][unit.y].unit = unit
     })
     if(!session.players.find((player)=>!player.isReady)){
@@ -47,7 +46,6 @@ export const onMatchStart = (currentUser:LocalUser, session:Session) => {
             turnTickLimit: 100000
         }
     })
-    toast.show({message: 'Match was begun.'})
 }
 
 export const onMoveUnit = (unit:Unit, session:Session) => {
@@ -68,7 +66,6 @@ export const onAttackTile = (attacker:Unit, tile:Tile, session:Session) => {
     if(target.hp > 0)
         session.map[target.x][target.y].unit = {...target}
     else delete session.map[target.x][target.y].unit
-
     sendSessionUpdate(session)
 }
 

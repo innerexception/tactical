@@ -1,5 +1,5 @@
 export enum Abilities {CHARGE='CHARGE'}
-export enum Traits {BLOCK='BLOCK', FLOAT='FLOAT', WATERBREATH='WATERBREATH', FIRESHOCK='FIRESHOCK'}
+export enum Traits {BLOCK='BLOCK', FLOAT='FLOAT', WATERBREATH='WATERBREATH', FIRESHOCK='FIRESHOCK', BRITTLE='BRITTLE'}
 export enum UnitType {
     REGULAR='REGULAR',
     IMMORTAL='IMMORTAL',
@@ -66,6 +66,42 @@ export const Units = {
             range: 1,
             sight: 2,
             attacks: 1
+        },
+        {
+            name: 'Immortal',
+            atk: 3,
+            hp: 3,
+            maxHp: 4,
+            move: 2,
+            maxMove: 2,
+            type: UnitType.IMMORTAL,
+            rune: 'c',
+            descriptions: ['regular description 1', 'regular description 2'],
+            ability: Abilities.CHARGE,
+            trait: null as null,
+            cost: 6,
+            level: 1,
+            range: 1,
+            sight: 2,
+            attacks: 1
+        },
+        {
+            name: 'Marksman',
+            atk: 1,
+            hp: 2,
+            maxHp: 2,
+            move: 1,
+            maxMove: 1,
+            type: UnitType.MARKSMAN,
+            rune: 'd',
+            descriptions: ['regular description 1', 'regular description 2'],
+            ability: null as null,
+            trait: null as null,
+            cost: 5,
+            level: 1,
+            range: 4,
+            sight: 2,
+            attacks: 1
         }
     ],
     [Army.DEAD]: [
@@ -86,6 +122,60 @@ export const Units = {
             range: 1,
             sight: 1,
             attacks: 1
+        },
+        {
+            name: 'Wisp',
+            atk: 1,
+            hp: 1,
+            maxHp: 1,
+            move: 2,
+            maxMove: 2,
+            type: UnitType.WISP,
+            rune: 'g',
+            descriptions: ['risen description 1', 'risen description 2'],
+            ability: null as null,
+            trait: Traits.FLOAT,
+            cost: 3,
+            level: 1,
+            range: 4,
+            sight: 1,
+            attacks: 1
+        },
+        {
+            name: 'Goul',
+            atk: 1,
+            hp: 2,
+            maxHp: 2,
+            move: 3,
+            maxMove: 3,
+            type: UnitType.GOUL,
+            rune: 'h',
+            descriptions: ['risen description 1', 'risen description 2'],
+            ability: null as null,
+            trait: Traits.WATERBREATH,
+            cost: 3,
+            level: 1,
+            range: 1,
+            sight: 4,
+            attacks: 1
+        },
+        {
+            name: 'Gargantuan',
+            atk: 2,
+            hp: 10,
+            maxHp: 10,
+            move: 2,
+            maxMove: 2,
+            type: UnitType.GARGANTUAN,
+            rune: 'i',
+            descriptions: ['risen description 1', 'risen description 2'],
+            ability: null as null,
+            trait: Traits.BRITTLE,
+            cost: 10,
+            level: 1,
+            range: 1,
+            sight: 4,
+            attacks: 2
         }
     ]
 

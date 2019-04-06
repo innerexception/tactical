@@ -93,9 +93,10 @@ export default class ArmyBuilder extends React.Component<Props, State> {
                         <div style={{position:'relative'}}>
                             <div style={{display:'flex', fontFamily:'Rune'}}>
                                 {this.state.army.filter((unit) => !unit.x && !unit.y).map((unit) => 
-                                    <div onClick={()=>this.setState({placingUnit:unit})} style={{textAlign:'right', padding: '0.25em'}}>
+                                    <div onClick={()=>this.setState({placingUnit:unit})} style={{textAlign:'center', padding: '0.25em'}}>
                                         <span style={{color: (this.state.placingUnit && (this.state.placingUnit as any).id === unit.id) ? AppStyles.colors.grey2 : 'black'}}>
-                                            {unit.rune}</span>
+                                            {unit.rune}
+                                        </span>
                                     </div>
                                 )}
                             </div>
@@ -117,7 +118,7 @@ export default class ArmyBuilder extends React.Component<Props, State> {
                         </div>
                         : 
                         <div style={styles.scrollContainer}>
-                            {Units[this.state.armyType].map((unit) => 
+                            {(Units as any)[this.state.armyType].map((unit:Unit) => 
                                 <div style={{display:'flex', justifyContent:'space-between'}}>
                                     <div style={styles.unitRow}>
                                         <div style={{fontFamily:'Rune', fontSize:'1em', width: '2em'}}>{unit.rune}</div>

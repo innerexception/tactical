@@ -28,6 +28,7 @@ interface LocalUser {
 }
 
 interface Unit {
+    name:string
     id:string
     ownerId: string
     x:number

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { onMoveUnit, onAttackTile } from '../uiManager/Thunks'
+import { onMoveUnit, onAttackTile, onEndTurn } from '../uiManager/Thunks'
 import { Card, Dialog, Tooltip, Position, Icon, PopoverInteractionKind, RadioGroup, Popover } from '@blueprintjs/core'
 import AppStyles from '../../AppStyles';
 import { Directions, TileType } from '../../../enum'
@@ -168,6 +168,7 @@ export default class Map extends React.Component<Props, State> {
                             </div>
                         )}
                     </div>  
+                    {hasNoMoves(this.props.activePlayer, this.props.map) && Button(true, ()=>onEndTurn(this.props.activeSession), 'End Turn')}
                 </div>
             </div>
             
@@ -175,11 +176,18 @@ export default class Map extends React.Component<Props, State> {
     }
 }
 
+const hasNoMoves = (player:Player, map:Array<Array<Tile>>) => {
+    let playerUnits = new Array<Unit>()
+    map.forEach(row=>row.forEach(tile=>{if(tile.unit && tile.unit.ownerId === player.id)playerUnits.push(tile.unit)}))
+    playerUnits = playerUnits.filter(unit=>unit.move > 0)
+    return playerUnits.length === 0
+}
+
 const getUnitPortraitOfTile = (tile:Tile, activePlayer:Player) => {
     let tileUnit = tile.unit
     if(tileUnit){
         return <div style={{opacity: getUnitOpacity(tileUnit, activePlayer), textAlign:'right', position:'absolute', top:0, right:0}}>
-                    <span>{tileUnit.rune}</span>
+                    <span style={{fontFamily:'Rune'}}>{tileUnit.rune}</span>
                     <div>{new Array(tileUnit.level).fill(null).map((lvl) =>  <div style={{...styles.levelBarOuter}}/>)}</div>
                     <div>{new Array(tileUnit.hp).fill(null).map((lvl) =>  <span>*</span>)}</div>
                </div>
@@ -202,9 +210,9 @@ const getUnitInfoOfTile = (tile:Tile, activePlayer:Player, getUnitActionButtons:
                             {isOwner && <h4 style={{margin:0}}>M: {unit.move} / {unit.maxMove}</h4>}
                             {getUnitActionButtons(activePlayer, unit)}
                         </div>
-                </div>
+                    </div>
         }
-        else 
+        else
             return <div style={styles.tileInfo}>
                         <h4>{tile.type}</h4>
                     </div>
@@ -231,7 +239,9 @@ const getTilesInRange = (unit:Unit, map:Array<Array<Tile>>) => {
         for(var i=unit.range; i>0; i--){
             candidateX += direction.x
             candidateY += direction.y
-            if(candidateY >= 0 && candidateX >= 0)
+            if(candidateY >= 0 && candidateX >= 0 
+                && candidateX < map.length 
+                && candidateY < map[0].length)
                 tiles[candidateX][candidateY] = true
         }
     })
