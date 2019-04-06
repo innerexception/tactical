@@ -48,7 +48,15 @@ export const TileSubType = {
     MOUNTAIN: ['a','h','i','j','k','g'],
     HILL: ['l','m','n','o'],
     FOREST: ['b','c','d','e','f'],
-    RIVER: ['p','q','r','s','t','u']
+    RIVER: ['p','q','r','s','t','u'],
+    GRASS: ['']
+}
+export const EmptyTile = {
+    x: 0,
+    y: 0,
+    type: TileType.GRASS,
+    subType: null as null,
+    unit: null as null
 }
 export const Units = {
     [Army.LIVING]: [
@@ -217,3 +225,41 @@ export const Units = {
     ]
 
 }
+
+export const StagingArea = [ 
+    [
+        {type:TileType.GRASS}, 
+        {type:TileType.GRASS},
+        {type:TileType.GRASS}
+    ],
+    [
+        {type:TileType.GRASS}, 
+        {type:TileType.GRASS},
+        {type:TileType.GRASS}
+    ],
+    [
+        {type:TileType.GRASS}, 
+        {type:TileType.GRASS},
+        {type:TileType.GRASS}
+    ],
+    [
+        {type:TileType.GRASS}, 
+        {type:TileType.GRASS},
+        {type:TileType.GRASS}
+    ],
+    [
+        {type:TileType.GRASS}, 
+        {type:TileType.GRASS},
+        {type:TileType.GRASS}
+    ],
+    [
+        {type:TileType.GRASS}, 
+        {type:TileType.GRASS},
+        {type:TileType.GRASS}
+    ],
+    [
+        {type:TileType.GRASS}, 
+        {type:TileType.GRASS},
+        {type:TileType.GRASS}
+    ],
+]

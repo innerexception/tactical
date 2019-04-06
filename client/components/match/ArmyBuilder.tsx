@@ -1,10 +1,10 @@
 import * as React from 'react'
-import { onMatchTick, onPlayerReady, onEndTurn } from '../uiManager/Thunks'
-import { Radio, RadioGroup, Position } from '@blueprintjs/core'
+import { onPlayerReady } from '../uiManager/Thunks'
+import { Radio, RadioGroup } from '@blueprintjs/core'
 import AppStyles from '../../AppStyles';
 import { TopBar, Button } from '../Shared'
-import { MatchStatus, UnitType, Army, Units } from '../../../enum';
-import Maps from '../../assets/Maps'
+import { getRandomInt } from '../Util'
+import { MatchStatus, UnitType, Army, Units, StagingArea } from '../../../enum';
 
 interface Props {
     me: Player
@@ -40,11 +40,15 @@ export default class ArmyBuilder extends React.Component<Props, State> {
     }
 
     setUnitCoords = (unit:Unit, x:number, y:number) => {
-        let army = this.state.army.map((aunit) => {
-            if(aunit.id === unit.id) return {...aunit, x, y}
-            return aunit
-        })
-        this.setState({army, placingUnit:null})
+        if(unit){
+            let army = this.state.army.map((aunit) => {
+                if(aunit.id === unit.id) return {...aunit, x, y}
+                return aunit
+            })
+            this.setState({army, placingUnit:null})
+        }
+        else 
+            this.setState({placingUnit:null})
     }
 
     prepArmy = () => {
@@ -53,7 +57,7 @@ export default class ArmyBuilder extends React.Component<Props, State> {
                 ...unit,
                 id: Date.now()+''+Math.random(),
                 ownerId: this.props.me.id,
-                description: unit.descriptions[Math.floor(Math.random() * Math.floor(unit.descriptions.length))]
+                description: unit.descriptions[getRandomInt(unit.descriptions.length)]
             }
         })
         return army
@@ -103,7 +107,7 @@ export default class ArmyBuilder extends React.Component<Props, State> {
                                 )}
                             </div>
                             <div style={{display:'flex', fontFamily:'Rune'}}>
-                                {Maps.StagingArea.map((row, x) => 
+                                {StagingArea.map((row, x) => 
                                     <div>
                                         {row.map((col, y) => 
                                             <div style={styles.tile} 

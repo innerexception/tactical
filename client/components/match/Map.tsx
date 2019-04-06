@@ -220,8 +220,7 @@ const getUnitPortraitOfTile = (tile:Tile, me:Player) => {
     if(tileUnit){
         return <div style={{opacity: getUnitOpacity(tileUnit, me), textAlign:'right', position:'absolute', top:0, right:0}}>
                     <span style={{fontFamily:'Rune'}}>{tileUnit.rune}</span>
-                    <div>{new Array(tileUnit.level).fill(null).map((lvl) =>  <div style={{...styles.levelBarOuter}}/>)}</div>
-                    <div>{new Array(tileUnit.hp).fill(null).map((lvl) =>  <span>*</span>)}</div>
+                    <div>{new Array(tileUnit.hp).fill(null).map((hp) =>  <span>*</span>)}</div>
                </div>
     }
     return <span/>

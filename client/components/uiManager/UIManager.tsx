@@ -2,6 +2,7 @@ import * as React from 'react';
 import Lobby from '../Lobby'
 import Match from '../match/Match'
 import Login from '../Login'
+import Editor from  '../Editor'
 import AppStyles from '../../AppStyles';
 
 interface Props {
@@ -22,6 +23,9 @@ export default class UIManager extends React.Component<Props> {
             return <Login {...this.props}/>
         }
         else {
+            if(this.props.currentUser.name === 'admin'){
+                return <Editor {...this.props}/>
+            }
             if(this.props.activeSession && !this.props.activeSession.status){
                 return <Lobby {...this.props}/>
             }

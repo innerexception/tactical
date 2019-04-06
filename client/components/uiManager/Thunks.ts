@@ -1,9 +1,8 @@
 import { dispatch } from '../../../client/App'
-import { ReducerActions } from '../../../enum'
+import { ReducerActions, MatchStatus } from '../../../enum'
 import WS from '../../WebsocketClient'
 export const server = new WS()
-import { MatchStatus } from '../../../enum'
-import Maps from '../../assets/Maps'
+import CrowsBridge from '../../assets/CrowsBridge'
 
 export const onLogin = (currentUser:LocalUser, sessionId:string) => {
     dispatch({ type: ReducerActions.SET_USER, currentUser })
@@ -38,10 +37,10 @@ export const onMatchStart = (currentUser:LocalUser, session:Session) => {
                 return {
                     ...player,
                     isReady:false,
-                    spawn: Maps.CrowBridge.SpawnPoints[i]
+                    spawn: CrowsBridge.SpawnPoints[i]
                 }
             }),
-            map: Maps.CrowBridge.Map.map((row, i) => row.map((tile:Tile, j) => {return {...tile, x:i, y:j}})),
+            map: CrowsBridge.Map.map((row, i) => row.map((tile:Tile, j) => {return {...tile, x:i, y:j}})),
             ticks: 0,
             turnTickLimit: 100000
         }

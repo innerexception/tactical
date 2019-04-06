@@ -30,7 +30,7 @@ export default class Match extends React.Component<Props, State> {
     }
 
     componentDidMount = () => {
-        this.setState({interval: this.state.isActive ? setInterval(()=>this.checkTimer(), 1000) : 0})
+        //this.setState({interval: this.state.isActive ? setInterval(()=>this.checkTimer(), 1000) : 0})
     }
 
     endTurn = () => {
@@ -53,7 +53,7 @@ export default class Match extends React.Component<Props, State> {
         return (
             <div style={AppStyles.window}>
                 {TopBar('MacTactics')}
-                <div style={{padding:'0.5em'}}>
+                <div style={{padding:'0.5em', maxWidth:'25em'}}>
                     <Map map={this.props.activeSession.map} 
                         me={me}
                         isActive={me.id === this.props.activeSession.activePlayerId}
