@@ -3,6 +3,7 @@ import { onMoveUnit, onAttackTile, onEndTurn } from '../uiManager/Thunks'
 import AppStyles from '../../AppStyles';
 import { Directions, TileType, MatchStatus } from '../../../enum'
 import { Button, LightButton } from '../Shared'
+import Match from './Match';
 
 interface Props {
     activeSession: Session
@@ -30,6 +31,29 @@ export default class Map extends React.Component<Props, State> {
         highlightTiles: [[false]],
         startX: -1,
         startY: -1
+    }
+
+    endTurn = () => {
+        this.setState({selectedTile: null})
+        onEndTurn(this.props.activeSession)
+    }
+
+    getNotification = () => {
+        let activeName = this.props.players.find(player=>player.id===this.props.activeSession.activePlayerId).name
+        if(this.props.activeSession.status === MatchStatus.WIN)
+            return <div style={{...styles.disabled, display: 'flex'}}>
+                        <div style={AppStyles.notification}>
+                            {activeName} is Victorious
+                        </div>
+                    </div>
+        else if(!this.props.isActive)
+            return (
+                <div style={{...styles.disabled, display: this.props.isActive ? 'none':'flex'}}>
+                    <div style={AppStyles.notification}>
+                        Waiting for {activeName}...
+                    </div>
+                </div>
+            )
     }
 
     moveUnit = (unit:Unit, direction:Directions) => {
@@ -98,7 +122,7 @@ export default class Map extends React.Component<Props, State> {
     getUnitActionButtons = (me:Player, unit?:Unit) => {
         if(unit){
             let isOwner = unit.ownerId === me.id
-            if(isOwner){
+            if(isOwner && this.props.isActive){
                 let buttons = []
                 if(this.state.attackingUnit){
                     buttons.push(LightButton(true, this.hideAttackTiles, 'Cancel'))
@@ -167,17 +191,12 @@ export default class Map extends React.Component<Props, State> {
                                 )}
                             </div>
                         )}
-                        <div style={{...styles.disabled, display: this.props.isActive ? 'none':'flex'}}>
-                            <div style={AppStyles.notification}>
-                                Waiting for {this.props.players.find(player=>player.id===this.props.activeSession.activePlayerId).name}...
-                            </div>
-                        </div>
-                    </div>  
+                    </div>
+                    {this.getNotification()}
                 </div>
                 <div style={{marginTop:'0.5em'}}>
                     {this.props.activeSession.status === MatchStatus.ACTIVE && 
-                        hasNoMoves(this.props.me, this.props.map) && 
-                        Button(this.props.isActive, ()=>onEndTurn(this.props.activeSession), 'End Turn')}
+                        Button(this.props.isActive && hasNoMoves(this.props.me, this.props.map), this.endTurn, 'End Turn')}
                 </div>
             </div>
             
@@ -226,7 +245,7 @@ const getUnitInfoOfTile = (tile:Tile, me:Player, getUnitActionButtons:Function) 
                         <h4>{tile.type}</h4>
                     </div>
     }
-    return <div style={styles.tileInfo}></div>
+    return <div style={styles.tileInfo}>No selection...</div>
 }
 
 const getUnitOpacity = (unit:Unit, me:Player) => {
@@ -268,7 +287,7 @@ const styles = {
     disabled: {
         pointerEvents: 'none' as 'none',
         alignItems:'center', justifyContent:'center', 
-        position:'absolute' as 'absolute', top:0, left:0, width:'100%', height:'100%', 
+        position:'absolute' as 'absolute', top:0, left:0, width:'100%', height:'100%'
     },
     mapFrame: {
         position:'relative' as 'relative',

@@ -1,7 +1,6 @@
 var WebSocketServer = require('websocket').server;
 var http = require('http');
-var Constants = require('../Constants.js').ReducerActions
-var MatchStatus = require('../Constants.js').MatchStatus
+var Constants = require('./Constants.js').ReducerActions
 /**
  * HTTP server
  */
@@ -67,9 +66,6 @@ wsServer.on('request', function(request) {
         }
         sessions[obj.sessionId] = targetSession
         publishSessionUpdate(targetSession)
-        if(targetSession.status === MatchStatus.LOSE || targetSession.status === MatchStatus.WIN){
-          delete sessions[targetSession.sessionId]
-        }
     }
   });
 

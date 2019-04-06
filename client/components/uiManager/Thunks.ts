@@ -1,13 +1,13 @@
 import { dispatch } from '../../../client/App'
-const Constants = require('../../../Constants')
+import { ReducerActions } from '../../../enum'
 import WS from '../../WebsocketClient'
 export const server = new WS()
 import { MatchStatus } from '../../../enum'
 import Maps from '../../assets/Maps'
 
 export const onLogin = (currentUser:LocalUser, sessionId:string) => {
-    dispatch({ type: Constants.ReducerActions.SET_USER, currentUser })
-    server.publishMessage({type: Constants.ReducerActions.PLAYER_AVAILABLE, currentUser, sessionId})
+    dispatch({ type: ReducerActions.SET_USER, currentUser })
+    server.publishMessage({type: ReducerActions.PLAYER_AVAILABLE, currentUser, sessionId})
 }
 
 export const onPlayerReady = (currentUser:Player, army:Array<Unit>, session:Session) => {
@@ -29,7 +29,7 @@ export const onPlayerReady = (currentUser:Player, army:Array<Unit>, session:Sess
 
 export const onMatchStart = (currentUser:LocalUser, session:Session) => {
     server.publishMessage({
-        type: Constants.ReducerActions.MATCH_UPDATE, 
+        type: ReducerActions.MATCH_UPDATE, 
         sessionId: session.sessionId,
         session: {
             status: MatchStatus.SETUP,
@@ -66,6 +66,15 @@ export const onAttackTile = (attacker:Unit, tile:Tile, session:Session) => {
     if(target.hp > 0)
         session.map[target.x][target.y].unit = {...target}
     else delete session.map[target.x][target.y].unit
+
+    let targetUnits = []
+    session.map.forEach(row=>row.forEach(tile=>{
+        if(tile.unit && tile.unit.ownerId === target.ownerId)
+            targetUnits.push(tile.unit)
+    }))
+    if(targetUnits.length <= 0)
+        session.status = MatchStatus.WIN
+    
     sendSessionUpdate(session)
 }
 
@@ -77,6 +86,12 @@ export const onMatchTick = (session:Session) => {
 export const onEndTurn = (session:Session) => {
     session.activePlayerId = session.players.find((player) => player.id !== session.activePlayerId).id
     session.ticks = 0
+    session.map.forEach(row=>row.forEach(tile=>{
+        if(tile.unit && tile.unit.ownerId === session.activePlayerId) {
+            tile.unit.move = tile.unit.maxMove
+            tile.unit.attacks = tile.unit.maxAttacks
+        }
+    }))
     sendSessionUpdate(session)
 }
 
@@ -92,13 +107,13 @@ export const onMatchLost = (session:Session) => {
 
 export const onCleanSession = () => {
     dispatch({
-        type:   Constants.ReducerActions.MATCH_CLEANUP
+        type: ReducerActions.MATCH_CLEANUP
     })
 }
 
 const sendSessionUpdate = (session:Session) => {
     server.publishMessage({
-        type: Constants.ReducerActions.MATCH_UPDATE,
+        type: ReducerActions.MATCH_UPDATE,
         sessionId: session.sessionId,
         session: {
             ...session

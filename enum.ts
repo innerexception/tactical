@@ -1,3 +1,24 @@
+export const ApiUrl= 'ws://localhost:1337'
+export const ReducerActions= {
+    PLAYER_AVAILABLE: 'ma',
+    MATCH_UPDATE: 'mu',
+    MATCH_TICK: 'mt',
+    PLAYER_READY: 'pr',
+    PLAYER_ENTERED: 'pe',
+    PLAYER_JOIN: 'pj',
+    PLAYER_LEFT: 'pl',
+    NEW_PHRASE: 'np',
+    MATCH_START: 'ms',
+    MATCH_WIN: 'mw',
+    MATCH_LOST: 'ml',
+    MATCH_CLEANUP: 'mc',
+    PHRASE_CORRECT: 'pc',
+    TIMER_TICK:'tt',
+    INIT_SERVER: 'is',
+    CONNECTION_ERROR: 'ce',
+    CONNECTED: 'c',
+    SET_USER: 'su'
+}
 export enum Abilities {CHARGE='CHARGE'}
 export enum Traits {BLOCK='BLOCK', FLOAT='FLOAT', WATERBREATH='WATERBREATH', FIRESHOCK='FIRESHOCK', BRITTLE='BRITTLE'}
 export enum UnitType {
@@ -47,7 +68,8 @@ export const Units = {
             level: 1,
             range: 2,
             sight: 2,
-            attacks: 1
+            attacks: 1,
+            maxAttacks: 1
         },
         {
             name: 'Regular',
@@ -65,7 +87,8 @@ export const Units = {
             level: 1,
             range: 1,
             sight: 2,
-            attacks: 1
+            attacks: 1,
+            maxAttacks: 1
         },
         {
             name: 'Immortal',
@@ -83,7 +106,8 @@ export const Units = {
             level: 1,
             range: 1,
             sight: 2,
-            attacks: 1
+            attacks: 1,
+            maxAttacks: 1
         },
         {
             name: 'Marksman',
@@ -101,7 +125,8 @@ export const Units = {
             level: 1,
             range: 4,
             sight: 2,
-            attacks: 1
+            attacks: 1,
+            maxAttacks: 1
         }
     ],
     [Army.DEAD]: [
@@ -121,7 +146,8 @@ export const Units = {
             level: 1,
             range: 1,
             sight: 1,
-            attacks: 1
+            attacks: 1,
+            maxAttacks: 1
         },
         {
             name: 'Wisp',
@@ -139,7 +165,8 @@ export const Units = {
             level: 1,
             range: 4,
             sight: 1,
-            attacks: 1
+            attacks: 1,
+            maxAttacks: 1
         },
         {
             name: 'Goul',
@@ -157,7 +184,8 @@ export const Units = {
             level: 1,
             range: 1,
             sight: 4,
-            attacks: 1
+            attacks: 1,
+            maxAttacks: 1
         },
         {
             name: 'Gargantuan',
@@ -175,7 +203,8 @@ export const Units = {
             level: 1,
             range: 1,
             sight: 4,
-            attacks: 2
+            attacks: 2,
+            maxAttacks: 2
         }
     ]
 

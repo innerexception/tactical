@@ -94,9 +94,9 @@ export default class ArmyBuilder extends React.Component<Props, State> {
                         {this.state.showArmyPlacement ? 
                         <div style={{position:'relative'}}>
                             <div style={{display:'flex', fontFamily:'Rune'}}>
-                                {this.state.army.filter((unit) => !unit.x && !unit.y).map((unit) => 
+                                {this.state.army.filter((unit) => typeof(unit.x)==='undefined' && typeof(unit.y)==='undefined').map((unit) => 
                                     <div onClick={()=>this.setState({placingUnit:unit})} style={{textAlign:'center', padding: '0.25em'}}>
-                                        <span style={{color: (this.state.placingUnit && (this.state.placingUnit as any).id === unit.id) ? AppStyles.colors.grey2 : 'black'}}>
+                                        <span style={{cursor:'pointer', color: (this.state.placingUnit && (this.state.placingUnit as any).id === unit.id) ? AppStyles.colors.grey2 : 'black'}}>
                                             {unit.rune}
                                         </span>
                                     </div>
@@ -109,7 +109,7 @@ export default class ArmyBuilder extends React.Component<Props, State> {
                                             <div style={styles.tile} 
                                                 onClick={()=>this.setUnitCoords(this.state.placingUnit, x, y)}>
                                                 {this.state.army.filter(unit=>unit.x === x && unit.y===y).map(unit=>
-                                                    <span> 
+                                                    <span style={{padding:'0.25em'}}> 
                                                         {unit.rune}
                                                     </span>)}
                                             </div>

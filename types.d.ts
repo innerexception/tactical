@@ -49,6 +49,7 @@ interface Unit {
     range: number
     sight: number
     attacks: number
+    maxAttacks: number
 }
 
 interface Player {

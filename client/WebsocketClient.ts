@@ -1,4 +1,4 @@
-const Constants = require('../Constants.js')
+import { ApiUrl } from '../enum'
 
 export default class WebsocketClient {
 
@@ -11,7 +11,7 @@ export default class WebsocketClient {
       this.onConnected = args.onConnected
       this.onConnectionError = args.onConnectionError
       this.onWSMessage = args.onWSMessage
-      this.launch(Constants.ApiUrl)
+      this.launch(ApiUrl)
     }
 
     launch = (url:string) => {

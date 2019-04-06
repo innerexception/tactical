@@ -1,28 +1,28 @@
-const Constants = require("../../../Constants")
+import { ReducerActions } from '../../../enum'
 
 export const setUser = (currentUser:object) => {
     return {
-        type: Constants.ReducerActions.SET_USER,
+        type: ReducerActions.SET_USER,
         currentUser
     }
 }
 
 export const initServer = (props:object) => {
     return {
-        type: Constants.ReducerActions.INIT_SERVER,
+        type: ReducerActions.INIT_SERVER,
         props
     }
 }
 
 export const connected = () => {
     return {
-        type: Constants.ReducerActions.CONNECTED
+        type: ReducerActions.CONNECTED
     }
 }
 
 export const connectionError = () => {
     return {
-        type: Constants.ReducerActions.CONNECTION_ERROR
+        type: ReducerActions.CONNECTION_ERROR
     }
 }
 
