@@ -57,6 +57,7 @@ export default {
         borderTopRightRadius: '5px',
         borderBottom: '1px solid'
     },
+    notification: {padding:'1em', border:'1px solid', borderRadius:'5px', background:'#f3f3f3'},
     hr: {
         margin:0,
         marginBottom:'1px'

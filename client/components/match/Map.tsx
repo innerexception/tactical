@@ -1,15 +1,15 @@
 import * as React from 'react'
 import { onMoveUnit, onAttackTile, onEndTurn } from '../uiManager/Thunks'
-import { Card, Dialog, Tooltip, Position, Icon, PopoverInteractionKind, RadioGroup, Popover } from '@blueprintjs/core'
 import AppStyles from '../../AppStyles';
-import { Directions, TileType } from '../../../enum'
+import { Directions, TileType, MatchStatus } from '../../../enum'
 import { Button, LightButton } from '../Shared'
 
 interface Props {
     activeSession: Session
-    activePlayer: Player
+    me: Player
     players: Array<Player>
     map: Array<Array<Tile>>
+    isActive: boolean
 }
 
 interface State {
@@ -95,9 +95,9 @@ export default class Map extends React.Component<Props, State> {
         this.hideAttackTiles()
     }
 
-    getUnitActionButtons = (activePlayer:Player, unit?:Unit) => {
+    getUnitActionButtons = (me:Player, unit?:Unit) => {
         if(unit){
-            let isOwner = unit.ownerId === activePlayer.id
+            let isOwner = unit.ownerId === me.id
             if(isOwner){
                 let buttons = []
                 if(this.state.attackingUnit){
@@ -148,7 +148,7 @@ export default class Map extends React.Component<Props, State> {
     render(){
         return (
             <div>
-                {getUnitInfoOfTile(this.state.selectedTile, this.props.activePlayer, this.getUnitActionButtons)}
+                {getUnitInfoOfTile(this.state.selectedTile, this.props.me, this.getUnitActionButtons)}
                 <div style={styles.mapFrame}>
                     <div style={{display:'flex'}}>
                         {this.props.map.map((row, x) => 
@@ -162,13 +162,22 @@ export default class Map extends React.Component<Props, State> {
                                         onClick={this.getTileClickHandler(tile)}>
                                         <div style={{fontFamily:'Terrain', color: AppStyles.colors.grey3, fontSize:'2em'}}>{tile.subType}</div>
                                         {this.state.movingUnit && this.getMoveArrowsOfTile(tile, this.state.movingUnit)}
-                                        {getUnitPortraitOfTile(tile, this.props.activePlayer)}
+                                        {getUnitPortraitOfTile(tile, this.props.me)}
                                     </div>
                                 )}
                             </div>
                         )}
+                        <div style={{...styles.disabled, display: this.props.isActive ? 'none':'flex'}}>
+                            <div style={AppStyles.notification}>
+                                Waiting for {this.props.players.find(player=>player.id===this.props.activeSession.activePlayerId).name}...
+                            </div>
+                        </div>
                     </div>  
-                    {hasNoMoves(this.props.activePlayer, this.props.map) && Button(true, ()=>onEndTurn(this.props.activeSession), 'End Turn')}
+                </div>
+                <div style={{marginTop:'0.5em'}}>
+                    {this.props.activeSession.status === MatchStatus.ACTIVE && 
+                        hasNoMoves(this.props.me, this.props.map) && 
+                        Button(this.props.isActive, ()=>onEndTurn(this.props.activeSession), 'End Turn')}
                 </div>
             </div>
             
@@ -183,10 +192,10 @@ const hasNoMoves = (player:Player, map:Array<Array<Tile>>) => {
     return playerUnits.length === 0
 }
 
-const getUnitPortraitOfTile = (tile:Tile, activePlayer:Player) => {
+const getUnitPortraitOfTile = (tile:Tile, me:Player) => {
     let tileUnit = tile.unit
     if(tileUnit){
-        return <div style={{opacity: getUnitOpacity(tileUnit, activePlayer), textAlign:'right', position:'absolute', top:0, right:0}}>
+        return <div style={{opacity: getUnitOpacity(tileUnit, me), textAlign:'right', position:'absolute', top:0, right:0}}>
                     <span style={{fontFamily:'Rune'}}>{tileUnit.rune}</span>
                     <div>{new Array(tileUnit.level).fill(null).map((lvl) =>  <div style={{...styles.levelBarOuter}}/>)}</div>
                     <div>{new Array(tileUnit.hp).fill(null).map((lvl) =>  <span>*</span>)}</div>
@@ -195,11 +204,11 @@ const getUnitPortraitOfTile = (tile:Tile, activePlayer:Player) => {
     return <span/>
 }
 
-const getUnitInfoOfTile = (tile:Tile, activePlayer:Player, getUnitActionButtons:Function) => {
+const getUnitInfoOfTile = (tile:Tile, me:Player, getUnitActionButtons:Function) => {
     if(tile){
         let unit = tile.unit
         if(unit){
-            let isOwner = unit.ownerId === activePlayer.id
+            let isOwner = unit.ownerId === me.id
             return <div style={styles.tileInfo}>
                         <div>
                             <h4 style={{margin:0}}>{tile.type}</h4>
@@ -208,7 +217,7 @@ const getUnitInfoOfTile = (tile:Tile, activePlayer:Player, getUnitActionButtons:
                         </div>
                         <div>
                             {isOwner && <h4 style={{margin:0}}>M: {unit.move} / {unit.maxMove}</h4>}
-                            {getUnitActionButtons(activePlayer, unit)}
+                            {getUnitActionButtons(me, unit)}
                         </div>
                     </div>
         }
@@ -220,8 +229,8 @@ const getUnitInfoOfTile = (tile:Tile, activePlayer:Player, getUnitActionButtons:
     return <div style={styles.tileInfo}></div>
 }
 
-const getUnitOpacity = (unit:Unit, activePlayer:Player) => {
-    let isOwner = unit.ownerId === activePlayer.id
+const getUnitOpacity = (unit:Unit, me:Player) => {
+    let isOwner = unit.ownerId === me.id
     if(isOwner) return 1
     else {
         //TODO determine closest owned unit to this unowned unit
@@ -256,6 +265,11 @@ const isSelectedTile = (tile:Tile, selectedTile?:Tile) => {
 }
 
 const styles = {
+    disabled: {
+        pointerEvents: 'none' as 'none',
+        alignItems:'center', justifyContent:'center', 
+        position:'absolute' as 'absolute', top:0, left:0, width:'100%', height:'100%', 
+    },
     mapFrame: {
         position:'relative' as 'relative',
         backgroundImage: 'url(./build'+require('../../assets/whiteTile.png')+')',
@@ -271,7 +285,8 @@ const styles = {
         marginBottom: '0.5em',
         padding: '0.5em',
         border: '1px dotted',
-        display:'flex'
+        display:'flex',
+        justifyContent:'space-between'
     },
     tile: {
         width: '2em',

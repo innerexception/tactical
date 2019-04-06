@@ -30,11 +30,13 @@ export default class ArmyBuilder extends React.Component<Props, State> {
     }
 
     setUnitTypeCount = (count:number, type:UnitType) => {
-        let army = this.state.army.filter((unit) => unit.type !== type)
-        army = army.concat(new Array(count).fill(
-            {...Units[this.state.armyType].find((unit) => unit.type === type)}
-        ))
-        this.setState({army, points: 30 - this.getArmyValue(army)})
+        if(count > 0){
+            let army = this.state.army.filter((unit) => unit.type !== type)
+            army = army.concat(new Array(count).fill(
+                {...Units[this.state.armyType].find((unit) => unit.type === type)}
+            ))
+            this.setState({army, points: 30 - this.getArmyValue(army)})
+        }
     }
 
     setUnitCoords = (unit:Unit, x:number, y:number) => {
@@ -74,7 +76,7 @@ export default class ArmyBuilder extends React.Component<Props, State> {
                 {TopBar('Army Builder')}
                 {this.props.me.isReady ? 
                     <div style={{padding:'1em', display:'flex', alignItems:'center', justifyContent:'center', height:'100%'}}>
-                        <h3 style={{textAlign:'center', background:'white', padding:'1em', borderRadius:'5px'}}>
+                        <h3 style={AppStyles.notification}>
                             Waiting for players: {this.props.activeSession.players.filter((player) => !player.isReady).map((player) => player.name).join(', ')}
                         </h3>
                     </div> : 

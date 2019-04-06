@@ -55,7 +55,8 @@ export default class Match extends React.Component<Props, State> {
                 {TopBar('MacTactics')}
                 <div style={{padding:'0.5em'}}>
                     <Map map={this.props.activeSession.map} 
-                        activePlayer={me}
+                        me={me}
+                        isActive={me.id === this.props.activeSession.activePlayerId}
                         activeSession={this.props.activeSession}
                         players={this.props.activeSession.players}/>
                     <div style={{...styles.modal, display: this.state.showMatchOptions ? 'flex':'none'}}>
