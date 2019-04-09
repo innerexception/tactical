@@ -364,7 +364,7 @@ const styles = {
     },
     mapFrame: {
         position:'relative' as 'relative',
-        backgroundImage: 'url(./build'+require('../../assets/whiteTile.png')+')',
+        backgroundImage: 'url('+require('../../assets/whiteTile.png')+')',
         backgroundRepeat: 'repeat',
         overflow:'auto',
         maxHeight:'60vh',
@@ -372,7 +372,7 @@ const styles = {
     },
     tileInfo: {
         height: '5em',
-        backgroundImage: 'url(./build'+require('../../assets/whiteTile.png')+')',
+        backgroundImage: 'url('+require('../../assets/whiteTile.png')+')',
         backgroundRepeat: 'repeat',
         marginBottom: '0.5em',
         padding: '0.5em',

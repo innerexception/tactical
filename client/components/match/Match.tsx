@@ -77,7 +77,7 @@ const styles = {
         position:'relative' as 'relative'
     },
     modal: {
-        backgroundImage: 'url(./build'+require('../../assets/tiny2.png')+')',
+        backgroundImage: 'url('+require('../../assets/tiny2.png')+')',
         backgroundRepeat: 'repeat',
         position:'absolute' as 'absolute',
         top:0, left:0, right:0, bottom:0,

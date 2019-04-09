@@ -154,7 +154,7 @@ const styles = {
         position:'relative' as 'relative'
     },
     modal: {
-        backgroundImage: 'url(./build'+require('../../assets/tiny2.png')+')',
+        backgroundImage: 'url('+require('../../assets/tiny2.png')+')',
         backgroundRepeat: 'repeat',
         position:'absolute' as 'absolute',
         top:0, left:0, right:0, bottom:0,
@@ -228,7 +228,7 @@ const styles = {
         height:'2em',
         border: '1px dashed',
         position:'relative' as 'relative',
-        backgroundImage: 'url(./build'+require('../../assets/whiteTile.png')+')',
+        backgroundImage: 'url('+require('../../assets/whiteTile.png')+')',
         backgroundRepeat: 'repeat'
     },
 }

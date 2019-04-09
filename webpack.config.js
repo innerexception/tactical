@@ -7,9 +7,8 @@ module.exports = {
     output: {
         path: path.join(__dirname, './build'),
         filename: 'bundle.js',
-        publicPath: '/',
     },
-    devtool: 'eval-source-map',
+    devtool: false,
     resolve: {extensions: ['.js', '.jsx', '.ts', '.tsx']},
     plugins: [
         new webpack.WatchIgnorePlugin([

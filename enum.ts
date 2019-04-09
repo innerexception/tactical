@@ -1,4 +1,5 @@
-export const ApiUrl= 'ws://localhost:1337'
+// export const ApiUrl= 'ws://localhost:3333'
+export const ApiUrl= 'wss://services.cryptomnesic.com:3333'
 export const ReducerActions= {
     PLAYER_AVAILABLE: 'ma',
     MATCH_UPDATE: 'mu',
